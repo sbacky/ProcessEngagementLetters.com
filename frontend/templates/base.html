@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}{% endblock %} - Process Engagement Letters</title>
+        <link rel="stylesheet" href="styles.css">
+        <script type="module" src="scripts/app.js"></script>
+        {% block headScript %}{% endblock %}
+        <script type="module">
+            const url = new URL(window.location.href);
+            const path = url.pathname;
+
+            const navbarItems = document.querySelectorAll('.nav-link');
+            navbarItems.forEach((item) => {
+                if (item.getAttribute('href') === path) {
+                    item.classList.add('active');
+                }
+            });
+        </script>
+    </head>
+    <body>
+        <!-- Header -->
+        <header>
+            <nav class="navbar">
+                <!-- Navbar content -->
+                <a href="/" class="navbar-brand">Process Engagement Letters</a>
+                <ul class="navbar-nav">
+                    <li><a href="/" class="nav-link">Home</a></li>
+                    <li><a href="/settings" class="nav-link">Settings</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <!-- Content -->
+        <main>
+            <div class="container-xl">{% block content %}{% endblock %}</div>
+        </main>
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2023 Process Engagement Letters</p>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,13 @@
+{
+    "FileSystemCache": {
+        "DEBUG": true,
+        "CACHE_TYPE": "FileSystemCache",
+        "CACHE_DEFAULT_TIMEOUT": 300,
+        "CACHE_IGNORE_ERRORS": false,
+        "CACHE_DIR": "_cache",
+        "CACHE_THRESHOLD": 500,
+        "CACHE_OPTIONS": {
+            "mode": 644
+        }
+    }
+}

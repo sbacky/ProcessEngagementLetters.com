@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings{% endblock %}
+
+{% block headScript %}
+<script type="module">
+    import app from './scripts/app.js';
+    await app.setup('userSettings');
+    window.app = app;
+
+    const userSettingsForm = document.getElementById('userSettings');
+    userSettingsForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const csrf = userSettingsForm.getElementById('csrf-token').value;
+        const formElements = userSettingsForm.querySelectorAll('.formElement');
+        
+        app.saveUserSettings(formElements, csrf);
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<form method="post" action="/settings" enctype="multipart/form-data" id="userSettings">
+    <input name="csrf-token" id="csrf-token" value="" hidden>
+    <div id="userSettings-alertPlaceholder"></div>
+    {% for setting in settings %}
+        <div class="formElement">
+            <label for="{{ setting.id }}">{{ setting.name }}</label>
+            {% if setting.type == 'string' %}
+                <input type="text" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
+            {% elif setting.type == 'number' %}
+                <input type="text" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
+            {% endif %}
+            <small>{{ setting.description }}</small>
+        </div>
+    {% endfor %}
+    <button type="submit">Save Settings</button>
+</form>
+<div id="alertModal-overlay" class="modal-overlay"></div>
+{% endblock %}

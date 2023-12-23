@@ -1,0 +1,8 @@
+_config.json
+__pycache__
+node_modules
+.venv
+process_engagement_letters.old.py
+.env
+_cache
+*.log*

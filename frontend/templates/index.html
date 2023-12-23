@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block headScript %}
+<script type="module">
+    import { app } from './scripts/app.js';
+    await app.setup('processEngagementLetters');
+    window.app = app;
+
+    window.selectFolder = function selectFolder(inputId) {
+        const filePickerId = inputId + '-picker';
+        document.getElementById(filePickerId).click();
+    }
+
+    window.folderSelected = function folderSelected(inputId, pickerId) {
+        const folderPicker = document.getElementById(pickerId);
+        const folderInput = document.getElementById(inputId);
+        if (folderPicker.files.length > 0) {
+            const folderName = folderPicker.files[0].webkitRelativePath.split('/')[0];
+            folderInput.value = folderName + ' (' + folderPicker.files.length + ' files)';
+        } else {
+            folderInput.value = '';
+        }
+    }
+
+    function isFolderSelectionSupported() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        return 'webkitdirectory' in input || 'directory' in input;
+    }
+
+    const folderSelectionSupportAlertEl = document.getElementById('folderSelectionSupport-alert');
+    if (!isFolderSelectionSupported()) {
+        folderSelectionSupportAlertEl.hidden = false;
+    }
+
+    const processEngagementLettersForms = document.getElementById('processEngagementLetters');
+    processEngagementLettersForms.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        app.processEngagementLetters(formData);
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="folderSelectionSupport-alert" class="alert alert-error" hidden>Incompatible browser for folder select. Please switch to Chrome, Edge or Opera.</div>
+<form method="post" action="/engagementLetters/document-rollover" enctype="multipart/form-data" id="processEngagementLetters">
+    <input name="csrf-token" id="csrf-token" value="" hidden>
+    <div id="processEngagementLetters-alertPlaceholder"></div>
+    <div id="processEngagementLetters-progressBarContainer" class="progress-bar-container">
+        <div id="progressBar" class="progress-bar"></div>
+    </div>
+    <div class="file-selector">
+        <input type="text" id="currentYearDirectory" disabled>
+        <button onclick="selectFolder('currentYearDirectory')">Select Folder</button>
+        <input type="file" name="currentYearDirectory" id="currentYearDirectory-picker" webkitdirectory directory multiple style="display: none;" onchange="folderSelected('currentYearDirectory', 'currentYearDirectory-picker')">
+    </div>
+    <button type="submit">Process</button>
+</form>
+<!-- Show results in a scrollable box -->
+<div id="processEngagementLetters-results" class="results-container"></div>
+<div id="alertModal-overlay" class="modal-overlay"></div>
+{% endblock %}
