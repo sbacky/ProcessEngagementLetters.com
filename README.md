@@ -1,10 +1,18 @@
 # Process Engagement Letters 2.0
 
+This is a Flask application for an Engagement Letter System. This application processes engagement letters by rolling them over to the next year. I added a front-end to a previous engagement letter project and updated how each engagement letter is processed.
+
 This project is a direct successor to my previous engagemnt letter project found here: https://github.com/sbacky/Proc-Engagement-Letters/tree/main.
+
+Previously, to process Engagement Letters, the user had to run the script on the command line using Powershell. Now, the user can run the FLask Application, open up a web browser (preferably Chrome or Edge)
 
 Create a .env file and set the SECRET_KEY. Use the .env.sample file for an example.
 
 DO NOT STORE IMPORTANT FILES IN 'temp/' DIRECTORY!!
+
+Recommended Browser: Chrome or Edge
+
+Selecting files might not work as intended if you do not use Chrome or Edge. This is because the application uses webkitdirectory to take advantage of the browsers ability to easily navigate a users file directory and select files.
 
 ## Settings
 
