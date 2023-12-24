@@ -50,7 +50,7 @@
 <form method="post" action="/engagementLetters/document-rollover" enctype="multipart/form-data" id="processEngagementLetters">
     <input name="csrf-token" id="csrf-token" value="" hidden>
     <div id="processEngagementLetters-alertPlaceholder"></div>
-    <div id="processEngagementLetters-progressBarContainer" class="progress-bar-container">
+    <div id="processEngagementLetters-progressBarContainer" class="progress-bar-container" hidden>
         <div id="progressBar" class="progress-bar"></div>
     </div>
     <div class="file-selector">
@@ -61,6 +61,7 @@
     <button type="submit">Process</button>
 </form>
 <!-- Show results in a scrollable box -->
+<h3>Results:</h3>
 <div id="processEngagementLetters-results" class="results-container"></div>
 <div id="alertModal-overlay" class="modal-overlay"></div>
 {% endblock %}
