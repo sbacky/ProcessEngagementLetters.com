@@ -28,6 +28,9 @@ class PELApp {
      */
     setProgress() {
         const progressBarContainer = document.getElementById(`${this.progress.process}-progressBarContainer`);
+        if (progressBarContainer.hidden) {
+            progressBarContainer.hidden = ! progressBarContainer.hidden;
+        }
         const progressBar = progressBarContainer.querySelector('.progress-bar');
 
         progressBar.style.width = `${this.progress.value * 100}%`;
