@@ -4,7 +4,7 @@ This is a Flask application for an Engagement Letter System. This application pr
 
 This project is a direct successor to my previous engagemnt letter project found here: https://github.com/sbacky/Proc-Engagement-Letters/tree/main.
 
-Previously, to process Engagement Letters, the user had to run the script on the command line using Powershell. Now, the user can run the FLask Application, open up a web browser (preferably Chrome or Edge)
+Previously, to process Engagement Letters, the user had to run the script on the command line using Powershell. Now, the user can run the FLask Application, open up a web browser (preferably Chrome or Edge), and go to localhost:5000/ to begin processing engagement letters.
 
 Create a .env file and set the SECRET_KEY. Use the .env.sample file for an example.
 
