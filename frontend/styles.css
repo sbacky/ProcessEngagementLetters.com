@@ -50,8 +50,15 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: var(--font-family);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     margin: 0;
     padding: 0;
+}
+
+main {
+    flex-grow: 1;
 }
 
 /* Primary */
@@ -371,6 +378,7 @@ body {
     margin-top: 10px;
 }
 .progress-bar {
+    width: 0%;
     height: 20px;
     background-color: #4caf50;
     border-radius: 5px;
@@ -414,17 +422,22 @@ body {
 /* Navbar styles */
 .navbar {
     background-color: var(--primary);
-    padding: var(--spacing-unit);
+    padding: calc(var(--spacing-unit) * 2);
+    padding-left: calc(var(--spacing-unit) * 4);
+    padding-right: calc(var(--spacing-unit) * 4);
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: var(--white-text);
+    box-shadow: var(--box-shadow);
 }
 
 .navbar-brand {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     color: var(--white-text);
     text-decoration: none;
+    padding: calc(var(--spacing-unit) / 2) 0;
+    margin-right: calc(var(--spacing-unit) * 2);
 }
 
 .navbar-nav {
@@ -435,13 +448,19 @@ body {
 }
 
 .navbar-nav li {
-    margin-left: var(--spacing-unit);
+    margin-left: calc(var(--spacing-unit) * 2);
 }
 
 .navbar-nav a {
     color: var(--white-text);
+    font-size: 1.25rem;
     text-decoration: none;
-    padding: var(--spacing-unit) 0;
+    padding: calc(var(--spacing-unit) / 2) calc(var(--spacing-unit));
+    transition: color var(--transition-duration);
+}
+
+.navbar-nav a:hover {
+    color: var(--accent);
 }
 
 .nav-link.active {
@@ -455,10 +474,60 @@ footer {
     background-color: var(--secondary);
     color: var(--white-text);
     text-align: center;
-    padding: var(--spacing-unit);
-    position: absolute;
+    padding: calc(var(--spacing-unit) * 2);
+    position: relative;
     bottom: 0;
     width: 100%;
+}
+
+/* Form Styles */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 2); /* Create consistent spacing between form elements */
+    margin-bottom: calc(var(--spacing-unit) * 2); /* Spacing at the bottom of the form */
+}
+
+.file-selector {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 1); /* Spacing between file input and button */
+}
+
+.file-selector input[type="text"] {
+    flex-grow: 1; /* Allow the text field to take up available space */
+    padding: calc(var(--spacing-unit) / 2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.file-selector button {
+    padding: calc(var(--spacing-unit) / 2) calc(var(--spacing-unit));
+    background-color: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color var(--transition-duration);
+}
+
+.file-selector button:hover {
+    background-color: var(--primary-dark);
+}
+
+button[type="submit"] {
+    padding: calc(var(--spacing-unit) / 2) calc(var(--spacing-unit));
+    background-color: var(--accent);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: background-color var(--transition-duration);
+    align-self: flex-start; /* Align the button to the start of the flex container */
+}
+
+button[type="submit"]:hover {
+    background-color: var(--accent-dark);
 }
 
 /* Results Container */
@@ -467,7 +536,8 @@ footer {
     border: 1px solid #ccc;
     padding: 10px;
     margin-top: 10px;
-    max-height: 200px;
+    min-height: 340px;
+    max-height: 340px;
     overflow-y: auto;
     font-family: monospace;
     white-space: pre;
@@ -536,5 +606,31 @@ footer {
         margin-right: auto;
         background: inherit; /* Background color */
         overflow: hidden; /* Overflow handling */
+    }
+}
+
+/* Responsive Navbar */
+@media (max-width: var(--breakpoint-md)) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-left: calc(var(--spacing-unit) * 2);
+        padding-right: calc(var(--spacing-unit) * 2);
+    }
+
+    .navbar-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        margin-top: calc(var(--spacing-unit) * 2);
+    }
+
+    .navbar-nav li {
+        margin: calc(var(--spacing-unit)) 0;
+    }
+
+    .navbar-nav a {
+        width: 100%;
+        text-align: left;
     }
 }
