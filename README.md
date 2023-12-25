@@ -6,9 +6,11 @@ This project is a direct successor to my previous engagemnt letter project found
 
 Previously, to process Engagement Letters, the user had to run the script on the command line using Powershell. Now, the user can run the FLask Application, open up a web browser (preferably Chrome or Edge), and go to localhost:5000/ to begin processing engagement letters.
 
-Create a .env file and set the SECRET_KEY. Use the .env.sample file for an example.
-
 DO NOT STORE IMPORTANT FILES IN 'temp/' DIRECTORY!!
+
+## Setup
+
+Before using the application, you must create a .env file and set the SECRET_KEY. Use the provided smaple .env file '.env.sample' in the root directory for an example. Place the .env file in the same directory as the sample env file.
 
 Recommended Browser: Chrome or Edge
 
