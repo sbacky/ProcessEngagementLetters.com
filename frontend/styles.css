@@ -402,33 +402,28 @@ main {
 .alert {
     padding: calc(var(--spacing-unit) * 2);
     margin-bottom: calc(var(--spacing-unit) * 2);
-    border: 1px solid transparent;
+    border: 2px solid transparent;
     border-radius: var(--border-radius);
     display: none;
 }
 .alert-link {
     color: var(--link-dark);
-    background-color: var(--link-light);
     border-color: var(--link);
 }
 .alert-info {
     color: var(--info-dark);
-    background-color: var(--info-light);
     border-color: var(--info);
 }
 .alert-error {
     color: var(--warning-error);
-    background-color: var(--warning-error);
     border-color: var(--error);
 }
 .alert-success {
     color: var(--success-dark);
-    background-color: var(--success-light);
     border-color: var(--success);
 }
 .alert-warning {
     color: var(--warning-dark);
-    background-color: var(--warning-light);
     border-color: var(--warning);
 }
 
@@ -479,7 +474,6 @@ main {
 .nav-link.active {
     color: var(--accent);
     font-weight: bold;
-    /* Add more styles as needed */
 }
 
 /* Footer styles */
