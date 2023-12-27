@@ -175,7 +175,7 @@ class PELApi {
      * @param {string} csrf - the CSRF token
      */
     async processLetters(formData, csrf) {
-        const endpoint = '/';
+        const endpoint = '/engagementLetters/document-rollover';
         const url = this.apiURL(endpoint);
         try {
             const resp = await fetch(url, {
