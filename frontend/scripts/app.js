@@ -80,7 +80,7 @@ class PELApp {
                 this.alertStatus.deleteAlert();
             }
             this.alertStatus.createAlert(`${event.detail.message}...`, ['alert-info']);
-            this.sendAlert(`${event.process}-alertPlaceholder`, this.alertStatus.getAlert());
+            this.sendAlert(`${event.detail.process}-alertPlaceholder`, this.alertStatus.getAlert());
             this.alertStatus.showAlert();
         });
 
@@ -131,17 +131,6 @@ class PELApp {
             this.alertModal.showModal();
         });
 
-        api.addCustomEventListener('csrf', (event) => {
-            // server response with csrf token
-            const forms = Array.from(document.forms);
-            forms.forEach((form) => {
-                let csrfEl = form.querySelector('#csrf-token')
-                if (csrfEl) {
-                    csrfEl.value = event.detail.token;
-                }
-            });
-        });
-
         api.addCustomEventListener('process-results', (event) => {
             const resultContainer = document.getElementById(`${event.detail.process}-results`);
             const fileStatus = event.detail.status;
@@ -150,6 +139,9 @@ class PELApp {
             const listItem = document.createElement('li');
             listItem.className = fileStatus === 'success' ? 'success-text' : 'error-text';
             listItem.textContent = `${fileStatus === 'success' ? 'Processed' : 'Failed'}: ${filename}`;
+
+            console.log(listItem);
+
             resultContainer.appendChild(listItem);
         });
 
