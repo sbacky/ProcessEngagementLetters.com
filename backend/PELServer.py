@@ -225,11 +225,6 @@ class Server:
                     "method": method,
                     "message": "Loading..."
                 })
-                # Send csrf token to frontend using socketIO event
-                self.send_message(type='csrf', message={
-                    'process': process,
-                    'token': self.csrf._get_csrf_token()
-                })
                 # Send complete event
                 self.send_message('complete', "Page loaded successfully!")
                 return render_template('index.html')
@@ -245,11 +240,6 @@ class Server:
                     "process": process,
                     "method": method,
                     "message": "Loading..."
-                })
-                # Send csrf token to frontend using socketIO event
-                self.send_message(type='csrf', message={
-                    'process': process,
-                    'token': self.csrf._get_csrf_token()
                 })
                 # Load existing settings
                 try:
@@ -309,7 +299,6 @@ class Server:
                     return jsonify({'status': 'error', 'message': f"An error occurred while saving user settings: {e}"}), 500
 
         @self.app.route('/engagementLetters/document-rollover', methods=['POST'])
-        @self.cache.cached(timeout=300)
         def process_engagement_letters():
             """
             form: path to directory containing engagement letters
@@ -322,8 +311,8 @@ class Server:
             if request.method == 'POST':
                 method = 'POST'
                 
-                current_year_files = request.files.getlist('currentYearDirectory-picker')
-                processed_files_directory = self.app.config.get('PROCESSED_FILES_DIRECTORY', get_full_path('temp\complete'))
+                current_year_files = request.files.getlist('currentYearDirectory')
+                processed_files_directory = self.app.config.get('PROCESSED_FILES_DIRECTORY', get_full_path('temp/complete'))
                 if not directory_check(processed_files_directory):
                     self.send_message('process-error', {
                         "error": "Letter Processing Error",
@@ -331,7 +320,7 @@ class Server:
                         "process": process,
                         "method": method
                     })
-                    return jsonify(error=ValueError(f'The specified directory ( {processed_files_directory} ) does not exist. Configure in settings or in config file.')), 400
+                    return jsonify(error=f'The specified directory ( {processed_files_directory} ) does not exist. Configure in settings or in config file.'), 400
                 
                 # Send processing event for POST method
                 self.send_message('processing', {
@@ -341,11 +330,13 @@ class Server:
                 })
                 
                 temp_dir = get_full_path('temp/processing')
+                directory_check(temp_dir, True)
 
                 try:
                     # TODO: Send progress event updates for number of files processed out o total files.
-                    for file in current_year_files:
-                        filename: str = os.path.basename(secure_filename(file.filename))
+                    total_files = len(current_year_files)
+                    for index, file in enumerate(current_year_files, 1):
+                        filename: str = secure_filename(os.path.basename(file.filename))
                         # Move to next file if it is not a word document file ending in '.docx'.
                         if filename.startswith('~') or not filename.endswith('.docx'):
                             continue
@@ -354,7 +345,7 @@ class Server:
                         temp_file_path = os.path.join(temp_dir, filename)
                         file.save(temp_file_path)
 
-                        processed_result, error = process_engagement_letter(temp_file_path)
+                        processed_result, error = process_engagement_letter(temp_file_path, processed_files_directory)
                         # Log errors
                         if (error is not None):
                             # Send process-error event
@@ -364,12 +355,17 @@ class Server:
                                 "process": process,
                                 "method": method
                             })
-                            self.app.logger.error(error, stack_info=True)
-                        
+                            self.app.logger.error(error)
+                        # Send results event to frontend
                         self.send_message('process-results',{
                             "process": process,
                             "status": "success" if processed_result is not None else "failed",
                             "filename": filename
+                        })
+                        # Send progress event to frontend
+                        self.send_message('progress', {
+                            'process': process,
+                            'value': index/total_files
                         })
 
                     self.send_message('complete', 'Successfully processed engagement letters!')
@@ -383,7 +379,7 @@ class Server:
                         "method": method
                     })
                     self.app.logger.exception(f'An unexpected error has occurred while processing {filename}', stack_info=True)
-                    return jsonify({'status': 'error', 'message': f'An unexpected error has occurred while processing {filename}'})
+                    return jsonify({'status': 'error', 'message': f'An unexpected error has occurred while processing {filename}'}), 500
                 finally:
                     # Clear 'temp/processing' directory
                     shutil.rmtree(temp_dir)
