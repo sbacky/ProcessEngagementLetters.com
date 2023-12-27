@@ -37,7 +37,7 @@ You should have received a copy of the GNU General Public License
 
 {% block content %}
 <form method="post" action="/settings" enctype="multipart/form-data" id="userSettings">
-    <input name="csrf-token" id="csrf-token" value="" hidden>
+    <input type="hidden" name="csrf-token" id="csrf-token" value="{{ csrf_token() }}">
     <div id="userSettings-alertPlaceholder"></div>
     {% for setting in settings %}
         <div class="formElement">

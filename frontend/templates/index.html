@@ -53,8 +53,8 @@ You should have received a copy of the GNU General Public License
     const processEngagementLettersForms = document.getElementById('processEngagementLetters');
     processEngagementLettersForms.addEventListener('submit', function(event) {
         event.preventDefault();
-
         const formData = new FormData(this);
+        console.log(formData);
         app.processEngagementLetters(formData);
     });
 </script>
@@ -63,7 +63,7 @@ You should have received a copy of the GNU General Public License
 {% block content %}
 <div id="folderSelectionSupport-alert" class="alert alert-error" hidden>Incompatible browser for folder select. Please switch to Chrome, Edge or Opera.</div>
 <form method="post" action="/engagementLetters/document-rollover" enctype="multipart/form-data" id="processEngagementLetters">
-    <input name="csrf-token" id="csrf-token" value="" hidden>
+    <input type="hidden" name="csrf-token" id="csrf-token" value="{{ csrf_token() }}">
     <div id="processEngagementLetters-alertPlaceholder"></div>
     <div id="processEngagementLetters-progressBarContainer" class="progress-bar-container" hidden>
         <div id="progressBar" class="progress-bar"></div>
