@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 import os
 import re
-from typing import Any
 import docx
 
 
@@ -22,55 +21,56 @@ def increment_date(match):
     year = int(match.group(1)) + 1
     return f" {year}"
 
-def precompile_patterns():
-    """ Precompile regular expressions for efficiency. """
-    patterns = {
-        'date_pattern': (re.compile(r"\s(20[0-9][0-9])"), lambda m: increment_date(m)),
-        'name_pattern': (re.compile(r"(.\$\d+), (.\$\d+)"), lambda m: f"Mike Taylor{m.group(1)}, Bob Maurer{m.group(2)}"),
-        'compliance_rate_pattern': (re.compile(r"(?P<first>[\s\w]+.\$)\d+(?P<second>,[\s\w]+.\$)\d+(?P<third>\.[\s\w]+\$)\d+.\d+(?P<fourth>\.[\w\s]+\$)\d+"), lambda m: r"\g<first>275 \g<second>275 \g<third>150-195 \g<fourth>65-75"),
-        'consulting_rate_pattern': (re.compile(r"(?P<first>consulting.*:[\s\w]+.\$)\d+(?P<second>,[\s\w]+.\$)\d+(?P<third>\.[\s\w]+\$)\d+.\d+"), lambda m: r"\g<first>295 \g<second>295 \g<third>150-195")
-    }
-    return patterns
+def get_new_filename(base_file, date_pattern):
+    """ Generate a new filename with incremented date. """
+    nameMatch = re.search(date_pattern, base_file)
+    if not nameMatch:
+        base, ext = os.path.splitext(base_file)
+        return f'{base}_updated{ext}'
+    return re.sub(date_pattern, lambda m: increment_date(m), base_file)
 
-def update_paragraph(para, patterns: dict[str, Any]):
-    """ Update dates and rates in a single paragraph. """
+def update_paragraphs(doc, date_pattern, partner_rate_pattern, associate_rate_pattern):
     updated = False
-    for pattern, replacement in patterns.values():
-        if pattern.search(para.text):
-            para.text = re.sub(pattern, replacement, para.text)
+    for para in doc.paragraphs:
+        # Update dates
+        if date_pattern.search(para.text):
+            para.text = re.sub(date_pattern, lambda m: increment_date(m), para.text)
             updated = True
+
+        # Update partner rates
+        if partner_rate_pattern.search(para.text):
+            para.text = re.sub(partner_rate_pattern, "Partner hourly rates are: Mike Taylor–$275, Bob Maurer–$275. Our Associate hourly rates range from $150-195. Our bookkeeping rate is $65-75 per hour.", para.text)
+            updated = True
+
+        # Update associate rates
+        if associate_rate_pattern.search(para.text):
+            para.text = re.sub(associate_rate_pattern, "Partner hourly rates are: Mike Taylor–$295, Bob Maurer–$295. Our Associate hourly rates range from $150-195.", para.text)
+            updated = True
+
     return updated
 
-def process_engagement_letter(filename, processed_file_directory):
-    """ Process a single engagement letter called filename and save to processed_file_directory."""
+def process_engagement_letter(filename: str, processed_file_directory):
+    """ Process a single engagement letter. """
     try:
         doc = docx.Document(filename)
-        updated = False
+        # regex patterns
+        date_pattern = re.compile(r"\s(20[0-9][0-9])")
+        partner_rate_pattern = re.compile(r"Partner hourly rates are:.*Our Associate hourly rates range from \$\d+-\d+\. Our bookkeeping rate is \$\d+-\d+ per hour\.")
+        associate_rate_pattern = re.compile(r"Partner hourly rates are:.*Our Associate hourly rates range from \$\d+-\d+\.")
 
-        patterns = precompile_patterns()
 
-        for para in doc.paragraphs:
-            if update_paragraph(para, patterns):
-                updated = True
+        updated = update_paragraphs(doc, date_pattern, partner_rate_pattern, associate_rate_pattern)
 
         if updated:
-            error = None
-            date_pattern, increment_method = patterns.get('date_pattern')
-            
-            new_filename = ''
-            nameMatch = re.search(date_pattern, filename)
-            if not nameMatch:
-                base, ext = os.path.splitext(filename)
-                new_filename = f'{base}_updated{ext}'
+            # filenames have 'els_test_' prepended to the name. This needs to be dropped from the filename
+            # filenames have spaces ' ' replaced with underscores '_'. These need to be converted back to spaces.
+            filename = ' '.join(filename.split('_'))
 
-                error = f'An error occured when trying to increment file name: {filename}. File is now saved as {new_filename}.'
-            else:
-                new_filename = re.sub(date_pattern, increment_method, filename)
-
+            new_filename = get_new_filename(os.path.basename(filename), date_pattern)
             new_file_path = os.path.join(processed_file_directory, new_filename)
             doc.save(new_file_path)
-            return new_file_path, error
-        else:
-            return None, f'File {filename} was not updated.'
+            return new_file_path, None
+        return None, f'File {filename} was not updated.'
+
     except Exception as error:
-        return None, f'An error occured while processing {filename}: {error}'
+        return None, str(error)
