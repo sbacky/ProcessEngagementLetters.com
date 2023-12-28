@@ -28,10 +28,9 @@ from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect, CSRFError
-from werkzeug.utils import secure_filename
 
 from backend.utils.load_json import load_json_data
-from backend.utils.path_utils import get_full_path, directory_check
+from backend.utils.path_utils import get_full_path, directory_check, custom_secure_filename
 from backend.processor import process_engagement_letter
 
 
@@ -335,7 +334,7 @@ class Server:
                 try:
                     total_files = len(current_year_files)
                     for index, file in enumerate(current_year_files, 1):
-                        filename: str = secure_filename(os.path.basename(file.filename))
+                        filename: str = custom_secure_filename(os.path.basename(file.filename))
                         # Move to next file if it is not a word document file ending in '.docx'.
                         if filename.startswith('~') or not filename.endswith('.docx'):
                             continue

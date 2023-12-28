@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 import os
 from pathlib import Path
+import re
 
 def directory_check(path, create_dir=False):
     """
@@ -53,3 +54,20 @@ def get_full_path(relative_path):
     full_path = project_root.joinpath(relative_path)
 
     return str(full_path.resolve())
+
+def custom_secure_filename(filename: str):
+    """
+    Sanitize filename while preserving specific non-alphanumeric characters.
+    """
+    # Replace spaces with underscores
+    filename = filename.replace(' ', '_')
+
+    # Preserve non-alphanumeric characters before '... Engagement Letter'
+    preserved_part = ''
+    match = re.search(r'(.*Engagement Letter)', filename, re.IGNORECASE)
+    if match:
+        preserved_part = match.group(1)
+
+    # Sanitize the rest of the filename
+    sanitized_part = re.sub(r'[^a-zA-Z0-9._-]', '', filename.replace(preserved_part, ''))
+    return preserved_part + sanitized_part
