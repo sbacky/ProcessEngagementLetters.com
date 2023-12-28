@@ -345,6 +345,25 @@ main {
     display: flex;
 }
 
+/* Title Classes */
+.title {
+    font-family: var(--heading-font-family);
+    font-weight: bold;
+    margin-bottom: calc(var(--spacing-unit) * 2);
+}
+
+.title.is-1 { font-size: 2.5rem; }
+.title.is-2 { font-size: 2rem; }
+.title.is-3 { font-size: 1.75rem; }
+.title.is-4 { font-size: 1.5rem; }
+.title.is-5 { font-size: 1.25rem; }
+.title.is-6 { font-size: 1rem; }
+
+/* Center Text */
+.text-center {
+    text-align: center;
+}
+
 /* Modal Styles */
 .modal-overlay {
     position: fixed;
