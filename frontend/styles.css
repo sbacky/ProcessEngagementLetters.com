@@ -514,6 +514,16 @@ form {
     margin-bottom: calc(var(--spacing-unit) * 2); /* Spacing at the bottom of the form */
 }
 
+.formElement {
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    display: flex;
+    flex-direction: column;
+}
+
+.formElement label, .formElement input, .formElement small {
+    margin-bottom: calc(var(--spacing-unit) / 2);
+}
+
 .file-selector {
     display: flex;
     align-items: center;
