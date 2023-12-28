@@ -29,6 +29,14 @@ def get_new_filename(base_file, date_pattern):
         return f'{base}_updated{ext}'
     return re.sub(date_pattern, lambda m: increment_date(m), base_file)
 
+def clean_filename(filename):
+    """Clean filename by dropping everything after 'Engagement Letter'."""
+    pattern = re.compile(r'(.*Engagement Letter).*?(\.docx)$', re.IGNORECASE)
+    match = pattern.search(filename)
+    if match:
+        return f'{match.group(1)}{match.group(2)}'
+    return filename
+
 def update_paragraphs(doc, date_pattern, partner_rate_pattern, associate_rate_pattern):
     updated = False
     for para in doc.paragraphs:
@@ -62,12 +70,14 @@ def process_engagement_letter(filename: str, processed_file_directory):
         updated = update_paragraphs(doc, date_pattern, partner_rate_pattern, associate_rate_pattern)
 
         if updated:
-            # filenames have 'els_test_' prepended to the name. This needs to be dropped from the filename
             # filenames have spaces ' ' replaced with underscores '_'. These need to be converted back to spaces.
             filename = ' '.join(filename.split('_'))
 
+            # Increment year in filename
             new_filename = get_new_filename(os.path.basename(filename), date_pattern)
-            new_file_path = os.path.join(processed_file_directory, new_filename)
+            # Clean the filename of the previous years tracking info
+            cleaned_filename = clean_filename(new_filename)
+            new_file_path = os.path.join(processed_file_directory, cleaned_filename)
             doc.save(new_file_path)
             return new_file_path, None
         return None, f'File {filename} was not updated.'
