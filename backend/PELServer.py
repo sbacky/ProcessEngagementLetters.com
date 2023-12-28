@@ -18,16 +18,15 @@ import os
 from pathlib import Path
 from queue import Queue
 import shutil
-import tempfile
 from typing import Any
+import webbrowser
 
-from flask import Flask, Response, make_response, render_template, send_from_directory, redirect, jsonify, request, url_for
+from flask import Flask, make_response, render_template, send_from_directory, jsonify, request
 from flask_socketio import SocketIO
 from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect, CSRFError
-from werkzeug.datastructures import ImmutableMultiDict
 from werkzeug.utils import secure_filename
 
 from backend.utils.load_json import load_json_data
@@ -408,6 +407,17 @@ class Server:
             message = data.get('message')
             self.app.logger.log(getattr(logging, level.upper()), message)
 
+    def open_browser(self, host, port):
+        """Auto opens browser on the given host and port. Will attempt to use Google Chrome first, but falls back to default browser if path to Chrome is not found"""
+        url = f'http://{host}:{port}/'
+        chrome_path = os.getenv('CHROME_PATH')
+
+        if chrome_path:
+            webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(chrome_path), 1)
+            webbrowser.get('chrome').open(url)
+        else:
+            webbrowser.open(url)
+
     def run(self, host, port, debug=True):
         """
         Start the server.
@@ -418,6 +428,7 @@ class Server:
         """
         self.setup_logging(debug)
         self.app.run(host=host, port=port, debug=debug)
+        self.open_browser(host, port)
 
     def shutdown_server(self):
         """
