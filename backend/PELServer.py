@@ -363,7 +363,7 @@ class Server:
                         self.send_message('process-results',{
                             "process": process,
                             "status": "success" if processed_result is not None else "failed",
-                            "filename": filename
+                            "filename": processed_result if processed_result is not None else filename
                         })
                         # Send progress event to frontend
                         self.send_message('progress', {
