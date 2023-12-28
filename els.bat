@@ -3,12 +3,12 @@ cd /d "%~dp0"
 
 echo Searching for Google Chrome...
 if exist "C:\Program Files\Google\Chrome\Application\chrome.exe" (
-    set CHROME_PATH=C:\Program Files\Google\Chrome\Application\chrome.exe
+    set "CHROME_PATH=C:\Program Files\Google\Chrome\Application\chrome.exe"
 ) else if exist "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" (
-    set CHROME_PATH=C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+    set "CHROME_PATH=C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
 ) else (
     echo Google Chrome not found. Falling back to the default browser.
-    set CHROME_PATH=
+    set "CHROME_PATH="
 )
 
 echo Checking for virtual environment...
