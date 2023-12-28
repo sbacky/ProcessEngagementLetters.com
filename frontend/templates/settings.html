@@ -46,7 +46,7 @@ You should have received a copy of the GNU General Public License
             {% if setting.type == 'string' %}
                 <input type="text" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
             {% elif setting.type == 'number' %}
-                <input type="text" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
+                <input type="number" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
             {% endif %}
             <small>{{ setting.description }}</small>
         </div>
