@@ -333,12 +333,15 @@ class Server:
                 directory_check(temp_dir, True)
 
                 try:
-                    # TODO: Send progress event updates for number of files processed out o total files.
                     total_files = len(current_year_files)
                     for index, file in enumerate(current_year_files, 1):
                         filename: str = secure_filename(os.path.basename(file.filename))
                         # Move to next file if it is not a word document file ending in '.docx'.
                         if filename.startswith('~') or not filename.endswith('.docx'):
+                            continue
+
+                        # Move to next file if filename has 'DO NOT ROLL'
+                        if 'DO NOT ROLL' in filename.upper():
                             continue
                         
                         # Save temp file to 'temp/processing'
