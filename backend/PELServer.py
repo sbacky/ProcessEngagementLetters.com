@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 from queue import Queue
 import shutil
+import threading
 from typing import Any
 import webbrowser
 
@@ -427,8 +428,8 @@ class Server:
         :param debug: [Optional] debug flag. Default is True.
         """
         self.setup_logging(debug)
+        threading.Timer(1.25, self.open_browser(host, port)).start()
         self.app.run(host=host, port=port, debug=debug)
-        self.open_browser(host, port)
 
     def shutdown_server(self):
         """
