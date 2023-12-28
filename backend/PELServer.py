@@ -414,7 +414,7 @@ class Server:
         chrome_path = os.getenv('CHROME_PATH')
 
         if chrome_path:
-            webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(chrome_path), 1)
+            webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(chrome_path))
             webbrowser.get('chrome').open(url)
         else:
             webbrowser.open(url)
@@ -428,7 +428,7 @@ class Server:
         :param debug: [Optional] debug flag. Default is True.
         """
         self.setup_logging(debug)
-        threading.Timer(1.25, self.open_browser(host, port)).start()
+        threading.Timer(1.25, lambda: self.open_browser(host, port)).start()
         self.app.run(host=host, port=port, debug=debug)
 
     def shutdown_server(self):
