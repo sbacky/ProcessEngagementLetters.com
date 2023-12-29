@@ -45,14 +45,14 @@ def update_paragraphs(doc, date_pattern, partner_rate_pattern, associate_rate_pa
             para.text = re.sub(date_pattern, lambda m: increment_date(m), para.text)
             updated = True
 
-        # # Update partner rates
-        # if partner_rate_pattern.search(para.text):
-        #     para.text = re.sub(partner_rate_pattern, "Partner hourly rates are: Mike Taylor–$275, Bob Maurer–$275. Our Associate hourly rates range from $150-195. Our bookkeeping rate is $65-75 per hour.", para.text)
-        #     updated = True
-        # # Update associate rates
-        # elif associate_rate_pattern.search(para.text):
-        #     para.text = re.sub(associate_rate_pattern, "Partner hourly rates are: Mike Taylor–$295, Bob Maurer–$295. Our Associate hourly rates range from $150-195.", para.text)
-        #     updated = True
+        # Update partner rates
+        if partner_rate_pattern.search(para.text):
+            para.text = re.sub(partner_rate_pattern, "Partner hourly rates are: Mike Taylor–$275, Bob Maurer–$275. Our Associate hourly rates range from $150-195. Our bookkeeping rate is $65-75 per hour.", para.text)
+            updated = True
+        # Update associate rates
+        elif associate_rate_pattern.search(para.text):
+            para.text = re.sub(associate_rate_pattern, "Partner hourly rates are: Mike Taylor–$295, Bob Maurer–$295. Our Associate hourly rates range from $150-195.", para.text)
+            updated = True
 
     return updated
 
@@ -62,8 +62,8 @@ def process_engagement_letter(filename: str, processed_file_directory):
         doc = docx.Document(filename)
         # regex patterns
         date_pattern = re.compile(r"\s(20[0-9][0-9])")
-        partner_rate_pattern = re.compile(r"Partner hourly rates are:.*Our Associate hourly rates range from \$\d+-\d+\. Our bookkeeping rate is \$\d+-\d+ per hour\.")
-        associate_rate_pattern = re.compile(r"Partner hourly rates are:.*Our Associate hourly rates range from \$\d+-\d+\.")
+        partner_rate_pattern = re.compile(r"Partner hourly rates are:\s*.*Our Associate hourly rates range from \$\d+-\d+\s*\.\s*Our bookkeeping rate is \$\d+-\d+\s*per hour\.")
+        associate_rate_pattern = re.compile(r"Partner hourly rates are:\s*.*Our Associate hourly rates range from \$\d+-\d+\s*\.")
 
 
         updated = update_paragraphs(doc, date_pattern, partner_rate_pattern, associate_rate_pattern)
