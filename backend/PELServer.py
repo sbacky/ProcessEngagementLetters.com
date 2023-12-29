@@ -25,8 +25,6 @@ import webbrowser
 from flask import Flask, make_response, render_template, send_from_directory, jsonify, request
 from flask_socketio import SocketIO
 from flask_caching import Cache
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect, CSRFError
 
 from backend.utils.load_json import load_json_data
@@ -38,14 +36,17 @@ class Server:
     """
     Server class to wrap around flask application. Handles configurations, routes, socketIO events, starting and stopping the server, and logging.
     """
+    STARTED = False
+    STATIC_DIR = 'frontend/static'
     TEMPLATES_DIR = 'frontend/templates'
     CACHE_CONFIG_PATH = "_cache_config.json"
     USER_CONFIG_PATH = "user-config.json"
 
     def __init__(self):
+        static_dir = get_full_path(self.STATIC_DIR)
         template_dir = get_full_path(self.TEMPLATES_DIR)
         # init flask app
-        self.app = Flask(__name__, template_folder=template_dir)
+        self.app = Flask(__name__, template_folder=template_dir, static_folder=static_dir, static_url_path='/static')
         self.app.config.from_pyfile(get_full_path('settings.py'))
         self.app.secret_key = self.app.config.get('SECRET_KEY')
         # CSRF protection
@@ -58,9 +59,6 @@ class Server:
         cache_type = self.app.config.get('CACHE_TYPE', "FileSystemCache")
         self.cache = self._config_cache(cache_type)
         self.cache.init_app(self.app)
-
-        # Setup rate-limiting
-        self.limiter = self._config_limiter()
 
         # add flask and socketio routes
         self.add_routes()
@@ -99,21 +97,6 @@ class Server:
             cache_config.update({'CACHE_DIR': cache_dir})
 
         return Cache(app=self.app, config=cache_config)
-    
-    def _config_limiter(self) -> Limiter:
-        """
-        Configure rate limiting for Flask using flask-limiter.
-
-        Daily and hourly limits configured in environment variables: DAILY_LIMIT, HOURLY_LIMIT
-        """
-        daily_limit = self.app.config.get('DAILY_LIMIT', 1000)
-        hourly_limit = self.app.config.get('HOURLY_LIMIT', 240)
-
-        return Limiter(
-            key_func=get_remote_address,
-            app=self.app,
-            default_limits=[f'{daily_limit} per day', f'{hourly_limit} per hour']
-        )
 
     def format_message(self, type: str, message: str|int|float|dict[str, Any]):
         """
@@ -418,7 +401,7 @@ class Server:
         else:
             webbrowser.open(url)
 
-    def run(self, host, port, debug=True):
+    def run(self, host, port, debug):
         """
         Start the server.
 
@@ -427,7 +410,15 @@ class Server:
         :param debug: [Optional] debug flag. Default is True.
         """
         self.setup_logging(debug)
-        threading.Timer(1.25, lambda: self.open_browser(host, port)).start()
+        self.app.logger.info("Starting the server.")
+
+        if debug and not os.environ.get('WERKZEUG_RUN_MAIN'):
+            self.app.logger.info("Setting up threading timer to open browser.")
+            threading.Timer(1.25, lambda: self.open_browser(host, port)).start()
+        elif not debug and not self.STARTED:
+            self.app.logger.info("Setting up threading timer to open browser.")
+            threading.Timer(1.25, lambda: self.open_browser(host, port)).start()
+            self.__class__.STARTED = True
         self.app.run(host=host, port=port, debug=debug)
 
     def shutdown_server(self):
