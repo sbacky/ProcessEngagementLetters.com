@@ -63,13 +63,17 @@ def custom_secure_filename(filename: str):
     # Replace spaces with underscores for consistency
     filename = filename.replace(' ', '_')
 
+    print('pre sanitization', filename)
+
     # Find the part of the filename up to '...Engagement Letter' and preserve it as is, including non-alphanumeric characters
-    match = re.search(r'(.*Engagement Letter)', filename, re.IGNORECASE)
+    match = re.search(r'(.*Engagement_Letter)', filename, re.IGNORECASE)
     if match:
         preserved_part = match.group(1)
     else:
         # If pattern is not found, falls back to using secure_filename from werkzeug.utils for sanitization
         return secure_filename(filename)
+    
+    print('post sanitization', filename)
 
     # Sanitize the rest of the filename, if any
     sanitized_part = re.sub(r'[^a-zA-Z0-9._-]', '', filename.replace(preserved_part, ''))
