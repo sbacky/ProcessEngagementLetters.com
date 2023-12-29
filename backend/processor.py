@@ -45,14 +45,14 @@ def update_paragraphs(doc, date_pattern, partner_rate_pattern, associate_rate_pa
             para.text = re.sub(date_pattern, lambda m: increment_date(m), para.text)
             updated = True
 
-        # Update partner rates
-        if partner_rate_pattern.search(para.text):
-            para.text = re.sub(partner_rate_pattern, "Partner hourly rates are: Mike Taylor–$275, Bob Maurer–$275. Our Associate hourly rates range from $150-195. Our bookkeeping rate is $65-75 per hour.", para.text)
-            updated = True
-        # Update associate rates
-        elif associate_rate_pattern.search(para.text):
-            para.text = re.sub(associate_rate_pattern, "Partner hourly rates are: Mike Taylor–$295, Bob Maurer–$295. Our Associate hourly rates range from $150-195.", para.text)
-            updated = True
+        # # Update partner rates
+        # if partner_rate_pattern.search(para.text):
+        #     para.text = re.sub(partner_rate_pattern, "Partner hourly rates are: Mike Taylor–$275, Bob Maurer–$275. Our Associate hourly rates range from $150-195. Our bookkeeping rate is $65-75 per hour.", para.text)
+        #     updated = True
+        # # Update associate rates
+        # elif associate_rate_pattern.search(para.text):
+        #     para.text = re.sub(associate_rate_pattern, "Partner hourly rates are: Mike Taylor–$295, Bob Maurer–$295. Our Associate hourly rates range from $150-195.", para.text)
+        #     updated = True
 
     return updated
 
