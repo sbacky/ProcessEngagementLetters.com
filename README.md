@@ -1,4 +1,4 @@
-# Process Engagement Letters 2.0
+# Engagement Letter System (ELS)
 
 This is a Flask application for an Engagement Letter System. This application processes engagement letters by rolling them over to the next year. I added a front-end to a previous engagement letter project and updated how each engagement letter is processed.
 
@@ -8,13 +8,23 @@ Previously, to process Engagement Letters, the user had to run the script on the
 
 DO NOT STORE IMPORTANT FILES IN 'temp/' DIRECTORY!!
 
-## Setup
-
-Before using the application, you must create a .env file and set the SECRET_KEY. Use the provided smaple .env file '.env.sample' in the root directory for an example. Place the .env file in the same directory as the sample env file.
+## Setup and Usage
 
 Recommended Browser: Chrome or Edge
 
 Selecting files might not work as intended if you do not use Chrome or Edge. This is because the application uses webkitdirectory to take advantage of the browsers ability to easily navigate a users file directory and select files.
+
+Additionally, you should have python 3.10.6+ and git 2.41.0+ installed.
+
+1. Clone this repository.
+
+```console
+git clone https://github.com/sbacky/ProcessEngagementLetters.com.git
+```
+
+2. Create a .env file and set the SECRET_KEY. Use the provided sample .env file '.env.sample' in the projects root directory for an example. Place your .env file in the same directory as the sample env file.
+
+3. Run 'els.bat'. The batch file will handle creating and activating the virtual environment, installing dependancies from requirements.txt, setting environment variables, pulling latest version from GitHub and launching the application.
 
 ## Settings
 
