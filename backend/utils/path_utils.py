@@ -14,6 +14,7 @@
 import os
 from pathlib import Path
 import re
+from werkzeug.utils import secure_filename
 
 def directory_check(path, create_dir=False):
     """
@@ -57,17 +58,19 @@ def get_full_path(relative_path):
 
 def custom_secure_filename(filename: str):
     """
-    Sanitize filename while preserving specific non-alphanumeric characters.
+    Sanitize filename while preserving specific non-alphanumeric characters. If pattern is not found, falls back to using secure_filename from werkzeug.utils
     """
-    # Replace spaces with underscores
+    # Replace spaces with underscores for consistency
     filename = filename.replace(' ', '_')
 
-    # Preserve non-alphanumeric characters before '... Engagement Letter'
-    preserved_part = ''
+    # Find the part of the filename up to '...Engagement Letter' and preserve it as is, including non-alphanumeric characters
     match = re.search(r'(.*Engagement Letter)', filename, re.IGNORECASE)
     if match:
         preserved_part = match.group(1)
+    else:
+        # If pattern is not found, falls back to using secure_filename from werkzeug.utils for sanitization
+        return secure_filename(filename)
 
-    # Sanitize the rest of the filename
+    # Sanitize the rest of the filename, if any
     sanitized_part = re.sub(r'[^a-zA-Z0-9._-]', '', filename.replace(preserved_part, ''))
     return preserved_part + sanitized_part
