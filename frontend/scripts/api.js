@@ -181,7 +181,7 @@ class PELApi {
             const resp = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': csrf
+                    'X-CSRF-Token': csrf
                 },
                 body: formData
             });
@@ -222,7 +222,7 @@ class PELApi {
             const resp = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'X-CSRFToken': csrf,
+                    'X-CSRF-Token': csrf,
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },

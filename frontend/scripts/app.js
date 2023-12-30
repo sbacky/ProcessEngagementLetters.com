@@ -397,20 +397,48 @@ class PELApp {
         const data = [];
 
         formElements.forEach((formElement) => {
-            let label = formElement.querySelector('label');
-            let input = formElement.querySelector('input');            
-            let small = formElement.querySelector('small')
+            let type = formElement.dataset.configType || "string";
+            
+            if (type === 'list') {
+                let label = formElement.querySelector('label');
+                let small = formElement.querySelector('small');
+                // handle list type
+                let names = Array.from(formElement.querySelectorAll('[name$="_name[]"]')).map(el => el.value);
+                let rates = Array.from(formElement.querySelectorAll('[name$="_rate[]"]')).map(el => el.value);
 
-            let formattedData = Object.assign({}, {
-                id: input.id,
-                name: label.innerText,
-                config_name: input.name,
-                description: small.innerText,
-                type: input.type === 'text' ? 'string' : input.type,
-                value: input.value
-            });
+                let listItems = names.map((name, index) => {
+                    return {
+                        name: name,
+                        rate: rates[index]
+                    };
+                });
 
-            data.push(formattedData);
+                let formattedData = Object.assign({}, {
+                    id: formElement.id,
+                    name: label.innerText,
+                    config_name: formElement.dataset.configName,
+                    description: small.innerText,
+                    type: type,
+                    value: listItems
+                });
+
+                data.push(formattedData);
+            } else {
+                let label = formElement.querySelector('label');
+                let input = formElement.querySelector('input');            
+                let small = formElement.querySelector('small')
+
+                let formattedData = Object.assign({}, {
+                    id: input.id,
+                    name: label.innerText,
+                    config_name: input.name,
+                    description: small.innerText,
+                    type: type === 'text' ? 'string' : type,
+                    value: input.value
+                });
+
+                data.push(formattedData);
+            }
         });
         await api.saveSettings(data, csrf);
     }

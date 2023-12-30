@@ -251,24 +251,28 @@ class Server:
                 # TODO: Implement logic to save new settings
                 try:
                     # Get form data
-                    form_data: list[dict[str, str|int]] = request.get_json()
+                    form_data: list[dict[str, str|int|list[dict[str, str]]]] = request.get_json()
                     # Load existing settings
                     user_config_path = get_full_path(self.USER_CONFIG_PATH)
                     settings: list[dict[str, str|int]] = load_json_data(user_config_path)
+
                     # Update settings with new values from the form
-                    for setting in settings:
-                        for form_setting in form_data:
-                            if setting.get('config_name') == form_setting.get('config_name'):
-                                new_value = form_setting.get('value')
-                                setting['value'] = int(new_value) if form_setting.get('type') == 'number' else new_value
+                    for form_setting in form_data:
+                        matching_setting = next((s for s in settings if  s['config_name'] == form_setting['config_name']), None)
+                        if matching_setting:
+                            if matching_setting['type'] == 'list':
+                                # Handle list type setting
+                                matching_setting['value'] = form_setting['value']
+                            else:
+                                # Handle other types (string, number)
+                                matching_setting['value'] = int(form_setting['value']) if matching_setting['type'] == 'number' else form_setting['value']
 
                     # Save updated settings
                     with open(user_config_path, 'w') as config_file:
-                        json.dumps(settings, config_file, indent=4)
+                        json.dump(settings, config_file, indent=4)
 
                     # Update app.config here if needed
-                    for setting in settings:
-                        self.app.config[setting['config_name']] = setting['value']
+                    self.apply_user_settings(settings)
 
                     return jsonify({'status': 'success', 'redirect': '/settings'}), 200
                 except Exception as e:
@@ -314,6 +318,9 @@ class Server:
                 temp_dir = get_full_path('temp/processing')
                 directory_check(temp_dir, True)
 
+                # Get rate options
+                rate_options = self.get_rate_options()
+
                 try:
                     total_files = len(current_year_files)
                     for index, file in enumerate(current_year_files, 1):
@@ -330,7 +337,7 @@ class Server:
                         temp_file_path = os.path.join(temp_dir, filename)
                         file.save(temp_file_path)
 
-                        processed_result, error = process_engagement_letter(temp_file_path, processed_files_directory)
+                        processed_result, error = process_engagement_letter(temp_file_path, processed_files_directory, **rate_options)
                         # Log errors
                         if (error is not None):
                             # Send process-error event
@@ -390,6 +397,21 @@ class Server:
             message = data.get('message')
             self.app.logger.log(getattr(logging, level.upper()), message)
 
+    def apply_user_settings(self, user_settings: list[dict[str, str|int]]):
+        """Update flask settings with new values from user settings."""
+        for setting in user_settings:
+            self.app.config[setting['config_name']] = setting['value']
+
+    def get_rate_options(self):
+        """Get rate options from app.config"""
+        rates = ['COMPLIANCE_PARTNER_RATES', 'COMPLIANCE_ASSOCIATE_RATES', 'COMPLIANCE_BOOKKEEPING_RATES', 'CONSULTING_PARTNER_RATES', 'CONSULTING_ASSOCIATE_RATES']
+        rate_options = {}
+        for rate in rates:
+            if rate in self.app.config:
+                rate_options[rate] = self.app.config.get(rate)
+
+        return rate_options
+
     def open_browser(self, host, port):
         """Auto opens browser on the given host and port. Will attempt to use Google Chrome first, but falls back to default browser if path to Chrome is not found"""
         url = f'http://{host}:{port}/'
@@ -411,6 +433,11 @@ class Server:
         """
         self.setup_logging(debug)
         self.app.logger.info("Starting the server.")
+
+        # Load existing user settings
+        user_config_path = get_full_path(self.USER_CONFIG_PATH)
+        settings: list[dict[str, str|int]] = load_json_data(user_config_path)
+        self.apply_user_settings(settings)
 
         if debug and not os.environ.get('WERKZEUG_RUN_MAIN'):
             self.app.logger.info("Setting up threading timer to open browser.")

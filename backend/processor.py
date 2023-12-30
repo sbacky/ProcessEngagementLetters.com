@@ -37,36 +37,59 @@ def clean_filename(filename):
         return f'{match.group(1)}{match.group(2)}'
     return filename
 
-def update_paragraphs(doc, date_pattern, partner_rate_pattern, associate_rate_pattern):
+def get_partner_rates(partner_rates: list[dict[str, str]]):
+    partner1 = f"{partner_rates[0].get('name')}–{partner_rates[0].get('rate')}"
+    partner2 = f"{partner_rates[1].get('name')}–{partner_rates[1].get('rate')}"
+    return partner1, partner2
+    
+
+def update_paragraphs(doc, date_pattern, compliance_rates_pattern, consulting_rates_pattern, **rate_options):
     updated = False
+    default_partner_rates = [
+        {
+            "name": "No name set",
+            "rate": "No rate set"
+        }, {
+            "name": "No name set",
+            "rate": "No rate set"
+        }
+    ]
     for para in doc.paragraphs:
         # Update dates
         if date_pattern.search(para.text):
             para.text = re.sub(date_pattern, lambda m: increment_date(m), para.text)
             updated = True
 
-        # Update partner rates
-        if partner_rate_pattern.search(para.text):
-            para.text = re.sub(partner_rate_pattern, "Partner hourly rates are: Mike Taylor–$275, Bob Maurer–$275. Our Associate hourly rates range from $150-195. Our bookkeeping rate is $65-75 per hour.", para.text)
+        # Update compliance rates
+        if compliance_rates_pattern.search(para.text):
+            # This is a list of dictionaries with each partner and their rate.
+            compliance_partner1, compliance_partner2 = get_partner_rates(rate_options.get('COMPLIANCE_PARTNER_RATES', default_partner_rates))
+            compliance_associate_rates = rate_options.get('COMPLIANCE_ASSOCIATE_RATES', 'No rate set')
+            compliance_bookkeeping_rates = rate_options.get('COMPLIANCE_BOOKKEEPING_RATES', "No rate set")
+
+            para.text = re.sub(compliance_rates_pattern, f"Partner hourly rates are: {compliance_partner1}, {compliance_partner2}. Our Associate hourly rates range from {compliance_associate_rates}. Our bookkeeping rate is {compliance_bookkeeping_rates} per hour.", para.text)
             updated = True
-        # Update associate rates
-        elif associate_rate_pattern.search(para.text):
-            para.text = re.sub(associate_rate_pattern, "Partner hourly rates are: Mike Taylor–$295, Bob Maurer–$295. Our Associate hourly rates range from $150-195.", para.text)
+        # Update consulting rates
+        elif consulting_rates_pattern.search(para.text):
+            # This is a list of dictionaries with each partner and their rate.
+            consulting_partner1, consulting_partner2 = get_partner_rates(rate_options.get('CONSULTING_PARTNER_RATES', default_partner_rates))
+            consulting_associate_rates = rate_options.get('CONSULTING_ASSOCIATE_RATES', 'No rate set')
+
+            para.text = re.sub(consulting_rates_pattern, f"Partner hourly rates are: {consulting_partner1}, {consulting_partner2}. Our Associate hourly rates range from {consulting_associate_rates}.", para.text)
             updated = True
 
     return updated
 
-def process_engagement_letter(filename: str, processed_file_directory):
+def process_engagement_letter(filename: str, processed_file_directory, **rate_options):
     """ Process a single engagement letter. """
     try:
         doc = docx.Document(filename)
         # regex patterns
         date_pattern = re.compile(r"\s(20[0-9][0-9])")
-        partner_rate_pattern = re.compile(r"Partner hourly rates are:\s*.*Our Associate hourly rates range from \$\d+-\d+\s*\.\s*Our bookkeeping rate is \$\d+-\d+\s*per hour\.")
-        associate_rate_pattern = re.compile(r"Partner hourly rates are:\s*.*Our Associate hourly rates range from \$\d+-\d+\s*\.")
+        compliance_rates_pattern = re.compile(r"Partner hourly rates are:\s*.*Our Associate hourly rates range from \$\d+-\d+\s*\.\s*Our bookkeeping rate is \$\d+-\d+\s*per hour\.")
+        consulting_rates_pattern = re.compile(r"Partner hourly rates are:\s*.*Our Associate hourly rates range from \$\d+-\d+\s*\.")
 
-
-        updated = update_paragraphs(doc, date_pattern, partner_rate_pattern, associate_rate_pattern)
+        updated = update_paragraphs(doc, date_pattern, compliance_rates_pattern, consulting_rates_pattern, **rate_options)
 
         if updated:
             # filenames have spaces ' ' replaced with underscores '_'. These need to be converted back to spaces.

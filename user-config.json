@@ -27,5 +27,58 @@
         "description": "Set the hourly rate limit for requests to the Flask backend. By default, this is set to 240 per hour.",
         "type": "number",
         "value": 240
+    }, {
+        "id": "PEL.Compliance.PartnerRates",
+        "name": "Compliance Partner Rates",
+        "config_name": "COMPLIANCE_PARTNER_RATES",
+        "description": "Set the hourly rates for partners for compliance services.",
+        "type": "list",
+        "value": [
+            {
+                "name": "Mike Taylor",
+                "rate": "$275"
+            },
+            {
+                "name": "Bob Maurer",
+                "rate": "$275"
+            }
+        ]
+    }, {
+        "id": "PEL.Compliance.AssociateRates",
+        "name": "Compliance Associate Rates",
+        "config_name": "COMPLIANCE_ASSOCIATE_RATES",
+        "description": "Set the hourly rates for associates for compliance services.",
+        "type": "string",
+        "value": "$150-195"
+    }, {
+        "id": "PEL.Compliance.BookkeepingRates",
+        "name": "Compliance Bookkeeping Rates",
+        "config_name": "COMPLIANCE_BOOKKEEPING_RATES",
+        "description": "Set the bookkeeping rates for compliance services.",
+        "type": "string",
+        "value": "$65-75"
+    }, {
+        "id": "PEL.Consulting.PartnerRates",
+        "name": "Consulting Partner Rates",
+        "config_name": "CONSULTING_PARTNER_RATES",
+        "description": "Set the hourly rates for partners for consulting services.",
+        "type": "list",
+        "value": [
+            {
+                "name": "Mike Taylor",
+                "rate": "$295"
+            },
+            {
+                "name": "Bob Maurer",
+                "rate": "$295"
+            }
+        ]
+    }, {
+        "id": "PEL.Consulting.AssociateRates",
+        "name": "Consulting Associate Rates",
+        "config_name": "CONSULTING_ASSOCIATE_RATES",
+        "description": "Seet the hourly rates for associates for consulting services.",
+        "type": "string",
+        "value": "$150-195"
     }
 ]

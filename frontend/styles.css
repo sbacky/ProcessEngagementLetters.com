@@ -524,6 +524,41 @@ form {
     margin-bottom: calc(var(--spacing-unit) / 2);
 }
 
+.input {
+    display: block;
+    width: 100%; /* Full width */
+    padding: calc(var(--spacing-unit) / 2);
+    margin-bottom: calc(var(--spacing-unit)); /* Space below the input */
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--black);
+    background-color: var(--white);
+    background-clip: padding-box;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: border-color var(--transition-duration) ease-in-out, box-shadow var(--transition-duration) ease-in-out;
+
+    /* Adding focus effect */
+    &:focus {
+        color: var(--black);
+        background-color: var(--white);
+        border-color: var(--primary);
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(var(--primary), 0.25);
+    }
+}
+
+/* Modifiers for input - like sizes and additional styles */
+.input-lg {
+    padding: calc(var(--spacing-unit));
+    font-size: 1.25rem;
+}
+
+.input-sm {
+    padding: calc(var(--spacing-unit) / 4);
+    font-size: 0.875rem;
+}
+
 .file-selector {
     display: flex;
     align-items: center;
@@ -564,6 +599,55 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
     background-color: var(--accent-dark);
+}
+
+.list-setting {
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    border: 1px solid var(--border-color);
+    padding: calc(var(--spacing-unit) * 2);
+    border-radius: var(--border-radius);
+    background-color: var(--off-white); /* Optional: different background for list settings */
+}
+
+.list-item {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 1);
+    margin-bottom: calc(var(--spacing-unit));
+}
+
+.list-item input[type="text"] {
+    flex-grow: 1;
+    padding: calc(var(--spacing-unit) / 2);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.remove-item-btn {
+    padding: calc(var(--spacing-unit) / 2);
+    background-color: var(--error);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.remove-item-btn:hover {
+    background-color: var(--error-dark);
+}
+
+.add-item-btn {
+    padding: calc(var(--spacing-unit) / 2);
+    background-color: var(--success);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    margin-top: calc(var(--spacing-unit));
+}
+
+.add-item-btn:hover {
+    background-color: var(--success-dark);
 }
 
 /* Results Container */

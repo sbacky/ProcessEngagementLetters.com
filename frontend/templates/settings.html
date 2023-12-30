@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 
 {% block headScript %}
 <script type="module">
-    import app from './scripts/app.js';
+    import { app } from './scripts/app.js';
     await app.setup('userSettings');
     window.app = app;
 
@@ -27,7 +27,7 @@ You should have received a copy of the GNU General Public License
     userSettingsForm.addEventListener('submit', (event) => {
         event.preventDefault();
 
-        const csrf = userSettingsForm.getElementById('csrf-token').value;
+        const csrf = userSettingsForm.querySelector('#csrf-token').value;
         const formElements = userSettingsForm.querySelectorAll('.formElement');
         
         app.saveUserSettings(formElements, csrf);
@@ -41,12 +41,23 @@ You should have received a copy of the GNU General Public License
     <input type="hidden" name="csrf-token" id="csrf-token" value="{{ csrf_token() }}">
     <div id="userSettings-alertPlaceholder"></div>
     {% for setting in settings %}
-        <div class="formElement">
+        <div class="formElement" data-config-type="{{ setting.type }}">
             <label for="{{ setting.id }}">{{ setting.name }}</label>
             {% if setting.type == 'string' %}
-                <input type="text" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
+                <input class="input" type="text" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
             {% elif setting.type == 'number' %}
-                <input type="number" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
+                <input class="input" type="number" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
+            {% elif setting.type == 'list' %}
+                <div class="list-setting" id="{{ setting.id }}" data-config-name="{{ setting.config_name }}" data-config-type="list">
+                    {% for value in setting.value %}
+                        <div class="list-item">
+                            <input class="input" type="text" name="{{ setting.config_name }}_name[]" placeholder="Name" value="{{ value.name }}">
+                            <input class="input" type="text" name="{{ setting.config_name }}_rate[]" placeholder="Rate" value="{{ value.rate }}">
+                            <button type="button" class="remove-item-btn" disabled hidden>Remove</button>
+                        </div>
+                    {% endfor %}
+                    <button type="button" class="add-item-btn" disabled hidden>Add New Item</button>
+                </div>
             {% endif %}
             <small>{{ setting.description }}</small>
         </div>
