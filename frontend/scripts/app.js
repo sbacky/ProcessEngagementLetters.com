@@ -34,6 +34,19 @@ class PELApp {
         this.runningProcess = null;
         // format {"error": "error_name", "message": "error_message", "process": "process_name", "method": "method_name"}
         this.lastExecutionError = null;
+
+        // property names to inject into document
+        this.propNames = [
+            '--primary',
+            '--secondary',
+            '--accent',
+            '--link',
+            '--info',
+            '--error',
+            '--success',
+            '--warning',
+            '--gray'
+        ];
     }
 
     /**
@@ -148,27 +161,28 @@ class PELApp {
         api.connectSocket();
     }
 
+    #applySavedColors() {
+        this.propNames.forEach((propertyName) => {
+            const lightColor = localStorage.getItem(`${propertyName}-light`);
+            const darkColor = localStorage.getItem(`${propertyName}-dark`);
+            const rgbaColor = localStorage.getItem(`${propertyName}-rgb`);
+    
+            if (lightColor) document.documentElement.style.setProperty(`${propertyName}-light`, lightColor);
+            if (darkColor) document.documentElement.style.setProperty(`${propertyName}-dark`, darkColor);
+            if (rgbaColor) document.documentElement.style.setProperty(`${propertyName}-rgb`, rgbaColor);
+        });
+    }
+
     /**
-     * Dynamically lighten and darken colors on document root
+     * Dynamically lighten and darken colors on document root.
      * 
      * Lighten: lightens the color passed by the percent passed
      * 
      * Darken: darkens the color passed by the percent passed
      */
     #addDynamicColors() {
-        const propNames = [
-            '--primary',
-            '--secondary',
-            '--accent',
-            '--link',
-            '--info',
-            '--error',
-            '--success',
-            '--warning',
-            '--gray'
-        ];
-        propNames.forEach((color) => {
-            this.#adjustColor(color, 0.1);
+        this.propNames.forEach((color) => {
+            this.#adjustColor(color, 15);
         });
     }
 
@@ -211,9 +225,16 @@ class PELApp {
 
         const lighterColor = this.#lightenColor(color, percent);
         const darkerColor = this.#darkenColor(color, percent);
+        const rgbaColor = this.#hexToRgba(color, 0.5);
 
         document.documentElement.style.setProperty(`${propertyName}-light`, lighterColor);
         document.documentElement.style.setProperty(`${propertyName}-dark`, darkerColor);
+        document.documentElement.style.setProperty(`${propertyName}-rgb`, rgbaColor);
+
+        // Save the new colors to local storage
+        localStorage.setItem(`${propertyName}-light`, lighterColor);
+        localStorage.setItem(`${propertyName}-dark`, darkerColor);
+        localStorage.setItem(`${propertyName}-rgb`, rgbaColor);
     }
 
     /**
@@ -246,6 +267,20 @@ class PELApp {
         const B = (num & 0x0000FF) - amt;
 
         return "#" + (0x1000000 + Math.max(0, Math.min(255, R)) * 0x10000 + Math.max(0, Math.min(255, G)) * 0x100 + Math.max(0, Math.min(255, B))).toString(16).slice(1);
+    }
+
+    #hexToRgba(hex, alpha = 1) {
+        // Ensure the hex string is valid and remove the '#' if present
+        let validHex = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        if (!validHex) return null;
+    
+        // Convert each component from hex to decimal
+        let r = parseInt(validHex[1], 16);
+        let g = parseInt(validHex[2], 16);
+        let b = parseInt(validHex[3], 16);
+    
+        // Return the RGBA color string
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     /**
@@ -371,6 +406,7 @@ class PELApp {
      * @param {string} [form] - form, if any, to autofocus on page load. 
      */
     async setup(form) {
+        this.#applySavedColors();
         this.#addDynamicColors();
         if (form) {
             this.webForm_AutoFocus(form)
@@ -396,11 +432,12 @@ class PELApp {
     async saveUserSettings(formElements, csrf) {
         const data = [];
 
-        formElements.forEach((formElement) => {
-            let type = formElement.dataset.configType || "string";
-            
+        formElements.forEach((formElement) => {     
+            let type = formElement.dataset.configType;
+                   
             if (type === 'list') {
                 let label = formElement.querySelector('label');
+                let input = formElement.querySelector('.list-setting');
                 let small = formElement.querySelector('small');
                 // handle list type
                 let names = Array.from(formElement.querySelectorAll('[name$="_name[]"]')).map(el => el.value);
@@ -414,11 +451,11 @@ class PELApp {
                 });
 
                 let formattedData = Object.assign({}, {
-                    id: formElement.id,
+                    id: input.id,
                     name: label.innerText,
-                    config_name: formElement.dataset.configName,
+                    config_name: input.dataset.configName,
                     description: small.innerText,
-                    type: type,
+                    type: input.dataset.configType,
                     value: listItems
                 });
 
@@ -433,7 +470,7 @@ class PELApp {
                     name: label.innerText,
                     config_name: input.name,
                     description: small.innerText,
-                    type: type === 'text' ? 'string' : type,
+                    type: input.type === 'text' ? 'string' : input.type,
                     value: input.value
                 });
 
