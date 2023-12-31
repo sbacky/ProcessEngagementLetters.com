@@ -524,9 +524,16 @@ form {
     margin-bottom: calc(var(--spacing-unit) / 2);
 }
 
+.form-group {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    gap: var(--spacing-unit);
+}
+
 .input {
     display: block;
-    width: 100%; /* Full width */
+    flex-grow: 1;
     padding: calc(var(--spacing-unit) / 2);
     margin-bottom: calc(var(--spacing-unit)); /* Space below the input */
     font-size: 1rem;
@@ -537,15 +544,24 @@ form {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     transition: border-color var(--transition-duration) ease-in-out, box-shadow var(--transition-duration) ease-in-out;
+}
 
-    /* Adding focus effect */
-    &:focus {
-        color: var(--black);
-        background-color: var(--white);
-        border-color: var(--primary);
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(var(--primary), 0.25);
-    }
+/* Adding focus effect */
+.input:focus {
+    color: var(--black);
+    background-color: var(--white);
+    border-color: var(--primary);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem var(--primary-rgb);
+}
+
+.input:hover {
+    border: 1px solid var(--primary-light);
+}
+
+.input:disabled {
+    background-color: var(--gray-light);
+    opacity: 0.7;
 }
 
 /* Modifiers for input - like sizes and additional styles */
@@ -562,43 +578,179 @@ form {
 .file-selector {
     display: flex;
     align-items: center;
-    gap: calc(var(--spacing-unit) * 1); /* Spacing between file input and button */
+    gap: calc(var(--spacing-unit) * 1);
 }
 
-.file-selector input[type="text"] {
-    flex-grow: 1; /* Allow the text field to take up available space */
-    padding: calc(var(--spacing-unit) / 2);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+.file-selector-input {
+    flex-grow: 1;
+    margin-right: calc(var(--spacing-unit) / 2);
 }
 
-.file-selector button {
+.btn {
     padding: calc(var(--spacing-unit) / 2) calc(var(--spacing-unit));
+    margin-bottom: calc(var(--spacing-unit));
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
     background-color: var(--primary);
     color: var(--white);
-    border: none;
+    border: 1px solid transparent;
     border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color var(--transition-duration);
+    transition: color var(--transition-duration) ease-in-out, background-color var(--transition-duration) ease-in-out, border-color var(--transition-duration) ease-in-out, box-shadow var(--transition-duration) ease-in-out;
 }
 
-.file-selector button:hover {
+.btn-lg {
+    padding: calc(var(--spacing-unit)) calc(var(--spacing-unit) * 2);
+    font-size: 1.25rem;
+}
+
+.btn-sm {
+    padding: calc(var(--spacing-unit) / 4) calc(var(--spacing-unit) / 2);
+    font-size: 0.875rem;
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
     background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
 }
 
-button[type="submit"] {
-    padding: calc(var(--spacing-unit) / 2) calc(var(--spacing-unit));
-    background-color: var(--accent);
-    color: var(--white);
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: background-color var(--transition-duration);
-    align-self: flex-start; /* Align the button to the start of the flex container */
+.btn-primary:focus {
+    background-color: var(--primary-light);
+    border-color: var(--primary-light);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--primary-rgb);
 }
 
-button[type="submit"]:hover {
-    background-color: var(--accent-dark);
+.btn-primary:active {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-secondary {
+    background-color: var(--secondary);
+    border-color: var(--secondary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-dark);
+    border-color: var(--secondary-dark);
+}
+
+.btn-secondary:focus {
+    background-color: var(--secondary-light);
+    border-color: var(--secondary-light);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--secondary-rgb);
+}
+
+.btn-secondary:active {
+    background-color: var(--secondary-dark);
+    border-color: var(--secondary-dark);
+}
+
+.btn-success {
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.btn-success:hover {
+    background-color: var(--success-dark);
+    border-color: var(--success-dark);
+}
+
+.btn-success:focus {
+    background-color: var(--success-light);
+    border-color: var(--success-light);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--success-rgb);
+}
+
+.btn-success:active {
+    background-color: var(--success-dark);
+    border-color: var(--success-dark);
+}
+
+.btn-info {
+    background-color: var(--info);
+    border-color: var(--info);
+}
+
+.btn-info:hover {
+    background-color: var(--info-dark);
+    border-color: var(--info-dark);
+}
+
+.btn-info:focus {
+    background-color: var(--info-light);
+    border-color: var(--info-light);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--info-rgb);
+}
+
+.btn-info:active {
+    background-color: var(--info-dark);
+    border-color: var(--info-dark);
+}
+
+.btn-warning {
+    background-color: var(--warning);
+    border-color: var(--warning);
+}
+
+.btn-warning:hover {
+    background-color: var(--warning-dark);
+    border-color: var(--warning-dark);
+}
+
+.btn-warning:focus {
+    background-color: var(--warning-light);
+    border-color: var(--warning-light);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--wwarning-rgb);
+}
+
+.btn-warning:active {
+    background-color: var(--warning-dark);
+    border-color: var(--warning-dark);
+}
+
+.btn-error {
+    background-color: var(--error);
+    border-color: var(--error);
+}
+
+.btn-error:hover {
+    background-color: var(--error-dark);
+    border-color: var(--error-dark);
+}
+
+.btn-error:focus {
+    background-color: var(--error-light);
+    border-color: var(--error-light);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--error-rgb);
+}
+
+.btn-error:active {
+    background-color: var(--error-dark);
+    border-color: var(--error-dark);
+}
+
+.submit-button {
+    width: auto;
 }
 
 .list-setting {
@@ -606,7 +758,7 @@ button[type="submit"]:hover {
     border: 1px solid var(--border-color);
     padding: calc(var(--spacing-unit) * 2);
     border-radius: var(--border-radius);
-    background-color: var(--off-white); /* Optional: different background for list settings */
+    background-color: var(--off-white);
 }
 
 .list-item {
@@ -752,5 +904,16 @@ button[type="submit"]:hover {
     .navbar-nav a {
         width: 100%;
         text-align: left;
+    }
+
+    .form-group {
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+        gap: calc(var(--spacing-unit) * 1);
+    }
+
+    .input {
+        width: 100%;
     }
 }

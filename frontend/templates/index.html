@@ -69,12 +69,14 @@ You should have received a copy of the GNU General Public License
     <div id="processEngagementLetters-progressBarContainer" class="progress-bar-container" hidden>
         <div id="progressBar" class="progress-bar"></div>
     </div>
-    <div class="file-selector">
-        <input type="text" id="currentYearDirectory" disabled>
-        <button type="button" onclick="selectFolder('currentYearDirectory')">Select Folder</button>
+    <div class="form-group">
+        <input class="input" type="text" id="currentYearDirectory" disabled>
+        <button class="btn btn-primary" type="button" onclick="selectFolder('currentYearDirectory')">Select Folder</button>
         <input type="file" name="currentYearDirectory" id="currentYearDirectory-picker" webkitdirectory directory multiple style="display: none;" onchange="folderSelected('currentYearDirectory', 'currentYearDirectory-picker')">
     </div>
-    <button type="submit">Process</button>
+    <div>
+        <button class="btn btn-secondary submit-button" type="submit">Process</button>
+    </div>
 </form>
 <!-- Show results in a scrollable box -->
 <h3>Results:</h3>

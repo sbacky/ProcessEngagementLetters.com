@@ -26,7 +26,6 @@ You should have received a copy of the GNU General Public License
         <!-- Android Chrome Icons -->
         <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/android-chrome-192x192.png') }}">
         <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/android-chrome-512x512.png') }}">
-        <link rel="stylesheet" href="styles.css">
         <script type="module" src="scripts/app.js"></script>
         {% block headScript %}{% endblock %}
         <script type="module">
@@ -40,6 +39,7 @@ You should have received a copy of the GNU General Public License
                 }
             });
         </script>
+        <link rel="stylesheet" href="styles.css">
     </head>
     <body>
         <!-- Header -->
