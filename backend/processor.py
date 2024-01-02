@@ -14,6 +14,7 @@
 import os
 import re
 import docx
+from docx.document import Document
 
 
 def increment_date(match):
@@ -43,7 +44,7 @@ def get_partner_rates(partner_rates: list[dict[str, str]]):
     return partner1, partner2
     
 
-def update_paragraphs(doc, date_pattern, compliance_rates_pattern, consulting_rates_pattern, **rate_options):
+def update_paragraphs(doc: Document, date_pattern, compliance_rates_pattern, consulting_rates_pattern, **rate_options):
     updated = False
     default_partner_rates = [
         {
@@ -83,7 +84,7 @@ def update_paragraphs(doc, date_pattern, compliance_rates_pattern, consulting_ra
 def process_engagement_letter(filename: str, processed_file_directory, **rate_options):
     """ Process a single engagement letter. """
     try:
-        doc = docx.Document(filename)
+        doc: Document = docx.Document(filename)
         # regex patterns
         date_pattern = re.compile(r"\s(20[0-9][0-9])")
         compliance_rates_pattern = re.compile(r"Partner hourly rates are:\s*.*Our Associate hourly rates range from \$\d+-\d+\s*\.\s*Our bookkeeping rate is \$\d+-\d+\s*per hour\.")
