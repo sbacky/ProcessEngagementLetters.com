@@ -69,7 +69,7 @@
         "id": "PEL.Consulting.AssociateRates",
         "name": "Consulting Associate Rates",
         "config_name": "CONSULTING_ASSOCIATE_RATES",
-        "description": "Seet the hourly rates for associates for consulting services.",
+        "description": "Set the hourly rates for associates for consulting services.",
         "type": "string",
         "value": "$150-195"
     }

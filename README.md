@@ -51,19 +51,40 @@ Set what cache type Flask uses. By default, FileSystemCache is used.
 * type: string
 * default: FileSystemCache
 
-### Daily Limit
+### Compliance Partner Rates
 
-Set the daily rate limit for requests to the Flask backend. By default, this is set to 1000 per day.
+Set the hourly rates for partners for compliance services.
 
-* type: number
-* default: 1000
+* type: list
+* default: [{name: "", rate: ""}, {name: "", rate: ""}]
 
-### Hourly Limit
+### Compliance Associate Rates
 
-Set the hourly rate limit for requests to the Flask backend. By default, this is set to 240 per hour.
+Set the hourly rates for associates for compliance services.
 
-* type: number
-* default: 240
+* type: string
+* default: ""
+
+### Compliance Bookkeeping Rates
+
+Set the bookkeeping rates for compliance services.
+
+* type: string
+* default: ""
+
+### Consulting Partner Rates
+
+Set the hourly rates for partners for consulting services.
+
+* type: list
+* default: [{name: "", rate: ""}, {name: "", rate: ""}]
+
+### Consulting Associate Rates
+
+Set the hourly rates for associates for consulting services.
+
+* type: string
+* default: ""
 
 ## Available Cache Types
 
