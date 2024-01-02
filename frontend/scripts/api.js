@@ -227,7 +227,7 @@ class PELApi {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(formData)
-            })
+            });
             const respData = await resp.json();
             if (respData.status == 'success') {
                 window.location.href = respData.redirect;
@@ -237,6 +237,30 @@ class PELApi {
         } catch (error) {
             this.logToServer('error', `An error occurred while saving settings: ${error}`);
             console.error(`An error occurred while saving settings: ${error}`);
+        }
+    }
+
+    /**
+     * 
+     * @param {FormData} formData - Form data for entityChecker form
+     * @param {string} csrf - the CSRF token
+     */
+    async checkEntities(formData, csrf) {
+        const endpoint = '/entityChecker/check-entities';
+        const url = this.apiURL(endpoint);
+        try {
+            const resp = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-Token': csrf
+                },
+                body: formData
+            });
+            const respText = await resp.text();
+            return respText.trim();
+        } catch (error) {
+            this.logToServer('error', `An error occurred while checking entities: ${error}`);
+            console.error(`An error occurred while checking entities: ${error}`);
         }
     }
 }
