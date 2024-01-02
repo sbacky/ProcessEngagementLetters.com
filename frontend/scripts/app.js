@@ -649,6 +649,36 @@ class PELApp {
     }
 
     /**
+     * Tests whether folder selection is supported by the current browser.
+     * @returns {boolean} true if folder selection is supported, false otherwise.
+     */
+    isFolderSelectionSupported() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        return 'webkitdirectory' in input || 'directory' in input;
+    }
+
+    setupFolderSelection() {
+        const selectFolder = (inputId) => {
+            const filePickerId = inputId + '-picker';
+            document.getElementById(filePickerId).click();
+        }
+    
+        const folderSelected = (inputId, pickerId) => {
+            const folderPicker = document.getElementById(pickerId);
+            const folderInput = document.getElementById(inputId);
+            if (folderPicker.files.length > 0) {
+                const folderName = folderPicker.files[0].webkitRelativePath.split('/')[0];
+                folderInput.value = folderName + ' (' + folderPicker.files.length + ' files)';
+            } else {
+                folderInput.value = '';
+            }
+        }
+
+        return {selectFolder, folderSelected};
+    }
+
+    /**
      * Setup the PELApp.
      * @param {string} [form] - form, if any, to autofocus on page load. 
      */
@@ -725,6 +755,28 @@ class PELApp {
             }
         });
         await api.saveSettings(data, csrf);
+    }
+
+    /**
+     * 
+     * @param {FormData} formData 
+     */
+    async entityChecker(formData) {
+        const csrf = formData.get('csrf-token');
+        formData.delete('csrf-token');
+
+        const html = await api.checkEntities(formData, csrf);
+        const tableContainer = document.getElementById('entityCheckerUpdate');
+        tableContainer.innerHTML = html;
+
+        const rows = tableContainer.querySelectorAll(".clickable-row");
+        rows.forEach((row) => {
+            row.addEventListener('click', () => {
+                const nextContent = row.nextElementSibling;
+                nextContent.classList.toggle('d-none');
+                nextContent.classList.toggle('d-table-row');
+            });
+        });
     }
 }
 
