@@ -836,6 +836,69 @@ form {
     margin: 5px 0; /* Spacing between list items */
 }
 
+/* Table Styles */
+.table-container {
+    width: 100%; /* Full width of the container */
+    margin: auto; /* Center the table in the container */
+    overflow-x: auto; /* Enable horizontal scrolling for smaller screens */
+}
+
+.table-container table {
+    width: 100%; /* Full width of the container */
+    border: 1px solid var(--black);
+}
+
+.table-container th, 
+.table-container td {
+  text-align: left; /* Align text to the left */
+  padding: calc(var(--spacing-unit)/2) var(--spacing-unit);
+}
+
+.clickable-row {
+    cursor: pointer;
+    background-color: var(--gray-light);
+    transition: background-color 0.3s ease;
+}
+
+.clickable-row:hover {
+    background-color: var(--white);
+    border-color: var(--info-light);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--info-rgb);
+}
+
+/* Accordion Styles */
+.accordion-content {
+    background-color: var(--white);
+    border-top: 1px solid var(--white);
+}
+  
+.accordion-content ul {
+    padding: var(--spacing-unit);
+    list-style-type: none;
+}
+
+.accordion-content li {
+    margin-bottom: 5px; /* Space between items */
+}
+
+/* Utility functions */
+.d-none {
+    display: none;
+}
+
+.d-table-row {
+    display: table-row;
+}
+
+.d-block {
+    display: block;
+}
+
+.d-flex {
+    display: flex;
+}
+
 /* Media Queries */
 /* Any devices smaller */
 @media (max-width: var(--breakpoint-sm)) {
