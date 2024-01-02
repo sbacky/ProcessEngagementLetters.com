@@ -468,7 +468,7 @@ class PELApp {
     
         // Handle range
         if (rate.includes('-')) {
-            return rate.split('-').every(part => this.isValidRate(part));
+            return rate.split('-').every(part => this.isValidRate(part.trim()));
         } else {
             return this.isValidRate(rate);
         }
@@ -502,10 +502,10 @@ class PELApp {
     
         // Handle range
         if (rate.includes('-')) {
-            const range = rate.split('-').map(this.formatSingleRate);
-            return range.join('-');
+            const range = rate.split('-').map(part => this.formatSingleRate(part.trim()));
+            return '$' + range.join('-');
         } else {
-            return this.formatSingleRate(rate);
+            return '$' + this.formatSingleRate(rate.trim());
         }
     }
 
@@ -528,7 +528,7 @@ class PELApp {
             // Keep as an integer
             formattedNumber = parseInt(number, 10);
         }
-        return '$' + formattedNumber;
+        return formattedNumber;
     }
 
     /**
