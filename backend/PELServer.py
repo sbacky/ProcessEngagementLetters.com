@@ -30,6 +30,7 @@ from flask_wtf.csrf import CSRFProtect, CSRFError
 from backend.utils.load_json import load_json_data
 from backend.utils.path_utils import get_full_path, directory_check, custom_secure_filename
 from backend.processor import process_engagement_letter
+from backend.extractor import process_document
 
 
 class Server:
@@ -353,7 +354,7 @@ class Server:
                             "process": process,
                             "status": "success" if processed_result is not None else "failed",
                             "filename": processed_result if processed_result is not None else filename
-                        })
+                        })                        
                         # Send progress event to frontend
                         self.send_message('progress', {
                             'process': process,
@@ -372,6 +373,81 @@ class Server:
                     })
                     self.app.logger.exception(f'An unexpected error has occurred while processing {filename}', stack_info=True)
                     return jsonify({'status': 'error', 'message': f'An unexpected error has occurred while processing {filename}'}), 500
+                finally:
+                    # Clear 'temp/processing' directory
+                    shutil.rmtree(temp_dir)
+
+        @self.app.route('/entityChecker', methods=['GET'])
+        def entity_checker():
+            # entity checker main page
+            process = 'entityChecker'
+            self.send_message("process-start", "Fetching entity checker page...")
+            if request.method == 'GET':
+                method = 'GET'
+                # Send processing event for GET method
+                self.send_message('processing', {
+                    "process": process,
+                    "method": method,
+                    "message": "Loading..."
+                })
+                # Send complete event
+                self.send_message('complete', "Page loaded successfully!")
+                return render_template('entity_checker.html')
+
+        @self.app.route('/entityChecker/check-entities', methods=['POST'])
+        def check_entities():
+            # check entities and return partial update
+            process = 'entityChecker'
+            self.send_message("process-start", "Checking entities...")
+            if request.method == 'POST':
+                method = 'POST'
+
+                # Get files uploaded from form.
+                entity_check_files = request.files.getlist('entityCheckDirectory')
+
+                # Send processing event for GET method
+                self.send_message('processing', {
+                    "process": process,
+                    "method": method,
+                    "message": "Processing..."
+                })
+
+                # Create temp dir to use for processing
+                temp_dir = get_full_path('temp/processing')
+                directory_check(temp_dir, True)
+
+                try:
+                    entities = []
+                    total_files = len(entity_check_files)
+                    for index, file in enumerate(entity_check_files, 1):
+                        # Clean and secure filename
+                        filename: str = custom_secure_filename(os.path.basename(file.filename))
+                        # Move to next file if it is not a word document file ending in '.docx'.
+                        if filename.startswith('~') or not filename.endswith('.docx'):
+                            continue
+                        # Save temp file to 'temp/processing'
+                        temp_file_path = os.path.join(temp_dir, filename)
+                        file.save(temp_file_path)
+                        # Extract entity info and add to entities list
+                        entity = process_document(temp_file_path)
+                        entities.append(entity)
+                        # Send progress event to frontend
+                        self.send_message('progress', {
+                            'process': process,
+                            'value': index/total_files
+                        })
+                    self.send_message('complete', "Successfully extracted entities!")
+                    return render_template('entity_table.html', data=entities)
+
+                except Exception as e:
+                    # Send process-error event
+                    self.send_message('process-error', {
+                        "error": "Entity Check Error",
+                        "message": f'An unexpected error has occurred while extracting entities.',
+                        "process": process,
+                        "method": method
+                    })
+                    self.app.logger.exception(f'An unexpected error has occurred while extracting entities.', stack_info=True)
                 finally:
                     # Clear 'temp/processing' directory
                     shutil.rmtree(temp_dir)
