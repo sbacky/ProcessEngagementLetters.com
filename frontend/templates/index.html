@@ -23,30 +23,12 @@ You should have received a copy of the GNU General Public License
     await app.setup('processEngagementLetters');
     window.app = app;
 
-    window.selectFolder = function selectFolder(inputId) {
-        const filePickerId = inputId + '-picker';
-        document.getElementById(filePickerId).click();
-    }
-
-    window.folderSelected = function folderSelected(inputId, pickerId) {
-        const folderPicker = document.getElementById(pickerId);
-        const folderInput = document.getElementById(inputId);
-        if (folderPicker.files.length > 0) {
-            const folderName = folderPicker.files[0].webkitRelativePath.split('/')[0];
-            folderInput.value = folderName + ' (' + folderPicker.files.length + ' files)';
-        } else {
-            folderInput.value = '';
-        }
-    }
-
-    function isFolderSelectionSupported() {
-        const input = document.createElement('input');
-        input.type = 'file';
-        return 'webkitdirectory' in input || 'directory' in input;
-    }
+    let {selectFolder, folderSelected} = app.setupFolderSelection();
+    window.selectFolder = selectFolder;
+    window.folderSelected = folderSelected;
 
     const folderSelectionSupportAlertEl = document.getElementById('folderSelectionSupport-alert');
-    if (!isFolderSelectionSupported()) {
+    if (!app.isFolderSelectionSupported()) {
         folderSelectionSupportAlertEl.hidden = false;
     }
 
