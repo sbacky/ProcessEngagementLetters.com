@@ -23,15 +23,8 @@ You should have received a copy of the GNU General Public License
     await app.setup('userSettings');
     window.app = app;
 
-    const userSettingsForm = document.getElementById('userSettings');
-    userSettingsForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        const csrf = userSettingsForm.querySelector('#csrf-token').value;
-        const formElements = userSettingsForm.querySelectorAll('.formElement');
-        
-        app.saveUserSettings(formElements, csrf);
-    });
+    app.validateUserSettingsInput();
+    app.validateUserSettingsForm();
 </script>
 {% endblock %}
 
@@ -45,8 +38,10 @@ You should have received a copy of the GNU General Public License
             <label for="{{ setting.id }}">{{ setting.name }}</label>
             {% if setting.type == 'string' %}
                 <input class="input" type="text" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
+                <div id="{{ setting.config_name }}-alertPlaceholder" hidden></div>
             {% elif setting.type == 'number' %}
                 <input class="input" type="number" id="{{ setting.id }}" name="{{ setting.config_name }}" value="{{ setting.value }}">
+                <div id="{{ setting.config_name }}-alertPlaceholder" hidden></div>
             {% elif setting.type == 'list' %}
                 <div class="list-setting" id="{{ setting.id }}" data-config-name="{{ setting.config_name }}" data-config-type="list">
                     {% for value in setting.value %}
@@ -55,6 +50,8 @@ You should have received a copy of the GNU General Public License
                             <input class="input" type="text" name="{{ setting.config_name }}_rate[]" placeholder="Rate" value="{{ value.rate }}">
                             <button type="button" class="remove-item-btn" disabled hidden>Remove</button>
                         </div>
+                        <div id="{{ setting.config_name }}_name[]-alertPlaceholder" hidden></div>
+                        <div id="{{ setting.config_name }}_rate[]-alertPlaceholder" hidden></div>
                     {% endfor %}
                     <button type="button" class="add-item-btn" disabled hidden>Add New Item</button>
                 </div>
