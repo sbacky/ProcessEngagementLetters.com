@@ -124,7 +124,7 @@ class PELApp {
             }
             const message = `${event.detail.error}: ${event.detail.message}`;
             this.alertStatus.createAlert(message, ['alert-error']);
-            const proc_name = this.runningProcess.process !== null ? this.runningProcess.process : event.detail.process;
+            const proc_name =  this.runningProcess.process !== null ? this.runningProcess.process : event.detail.process;
             this.sendAlert(`${proc_name}-alertPlaceholder`, this.alertStatus.getAlert());
             this.alertStatus.showAlert();
         });
@@ -156,6 +156,24 @@ class PELApp {
             console.log(listItem);
 
             resultContainer.appendChild(listItem);
+        });
+
+        api.addCustomEventListener('form-feedback', (event) => {
+            // detail: {name: string, isValid: boolean, message: string}
+            const alertPlaceholder = document.getElementById(`${event.detail.name}-alertPlaceholder`);
+            // delete previous alert in placeholder, if any.
+            alertPlaceholder.innerHTML = '';
+            if (!event.detail.isValid) {
+                // create a new alert, add to placeholder and make placeholder visible
+                const formAlert = new AlertStatus();
+                formAlert.createAlert(event.detail.message, ['alert-error']);
+                alertPlaceholder.appendChild(formAlert.getAlert());
+                formAlert.showAlert();
+                alertPlaceholder.hidden = false;
+            } else {
+                // Hide alert placeholder
+                alertPlaceholder.hidden = true;
+            }
         });
 
         api.connectSocket();
@@ -399,6 +417,235 @@ class PELApp {
             }
         }
         return true;
+    }
+
+    /**
+     * Validates if the given path is a valid path-like string.
+     * This includes both fully qualified and relative paths with forward or backward slashes.
+     * Note: This function only checks the format of the path string.
+     * Actual existence and creation of the path are handled by the backend server.
+     * The backend will normalize the path for the correct operating system.
+     * @param {string} path - The directory path to validate.
+     * @returns {boolean} True if the path resembles a valid directory path with forward or backward slashes, false otherwise.
+     */
+    isValidDirectoryPath(path) {
+        // Regex for Windows directory path (both fully qualified and relative, with forward/backward slashes)
+        const regex = /^(?:[a-zA-Z]:[\/\\])?(?:[^<>:"|?*\n]+[\/\\]?)*([^<>:"|?*\n]*)$/;
+        return regex.test(path);
+    }
+
+    /**
+     * Checks if the given cache type is valid.
+     * @param {string} type - The cache type to validate.
+     * @returns {boolean} True if the cache type is valid, false otherwise.
+     */
+    isValidCacheType(type) {
+        const validTypes = ['NullCache', 'SimpleCache', 'FileSystemCache', 'RedisCache', 'RedisSentinelCache', 'RedisClusterCache', 'UWSGICache', 'MemcachedCache', 'SASLMemcachedCache', 'SpreadSASLMemcachedCache'];
+        return validTypes.includes(type);
+    }
+
+    /**
+     * Validates if the name contains only alphanumeric and common non-alphanumeric characters.
+     * @param {string} name - The name to validate.
+     * @returns {boolean} True if the name is valid, false otherwise.
+     */
+    isValidName(name) {
+        // Accept alphanumeric and common non-alphanumeric characters
+        const regex = /^[a-zA-Z0-9\s.,'-]+$/;
+        return regex.test(name);
+    }
+
+    /**
+     * 
+     * @param {string} rate - The rate string to format and validate.
+     * @returns 
+     */
+    rateValidator(rate) {
+        // Ensure rate starts with $
+        if (rate.startsWith('$')) {
+            rate = rate.replace('$', '');
+        }
+    
+        // Handle range
+        if (rate.includes('-')) {
+            return rate.split('-').every(part => this.isValidRate(part));
+        } else {
+            return this.isValidRate(rate);
+        }
+    }
+
+    /**
+     * Validates if the given rate is a valid number or float.
+     * @param {string} rate - The rate string to validate.
+     * @returns {boolean} True if the rate is a valid number or float, false otherwise.
+     */
+    isValidRate(rate) {
+        // Regular expression for validating a number (integer or float)
+        const regex = /^-?\d+(\.\d+)?$/;
+        
+        // Remove $ if present and trim whitespace
+        let number = rate.replace(/^\$/, '').trim();
+
+        return regex.test(number);
+    }
+
+    /**
+     * Formats a rate string. Adds a dollar sign if missing and formats decimal places.
+     * @param {string} rate - The rate string to format and validate.
+     * @returns {string} The formatted rate string.
+     */
+    rateFormatter(rate) {
+        // Ensure rate starts with $
+        if (!rate.startsWith('$')) {
+            rate = '$' + rate;
+        }
+    
+        // Handle range
+        if (rate.includes('-')) {
+            const range = rate.split('-').map(this.formatSingleRate);
+            return range.join('-');
+        } else {
+            return this.formatSingleRate(rate);
+        }
+    }
+
+    /**
+     * Formats a single rate string. Ensures two decimal places if the rate is a float,
+     * otherwise keeps it as an integer. Adds a dollar sign if missing.
+     * @param {string} rate - The rate string to format.
+     * @returns {string} The formatted rate string.
+     */
+    formatSingleRate(rate) {
+        // Remove $ if present
+        let number = rate.replace(/^\$/, '').trim();
+
+        // Check if the number is a float
+        let formattedNumber;
+        if (number.includes('.')) {
+            // Format as a float with two decimal places
+            formattedNumber = parseFloat(number).toFixed(2);
+        } else {
+            // Keep as an integer
+            formattedNumber = parseInt(number, 10);
+        }
+        return '$' + formattedNumber;
+    }
+
+    /**
+     * Adds visual feedback for invalid input fields.
+     * @param {HTMLInputElement} input - The input element to mark as invalid.
+     * @param {boolean} isValid - Whether the input is valid or not.
+     * @param {string} [errorMessage] - [Optional] The error message
+     */
+    markInputValidity(input, isValid, errorMessage) {
+        if (isValid) {
+            input.classList.remove(['input-error']);
+            input.classList.add(['input-success']);
+        } else {
+            input.classList.remove(['input-success']);
+            input.classList.add(['input-error']);
+        }
+
+        // detail: {name: string, isValid: boolean, message: string}
+        const detail = Object.assign({}, {
+            name: input.getAttribute('name'),
+            isValid: isValid,
+            message: errorMessage
+        });
+
+        api.dispatchCustomEvent(new CustomEvent('form-feedback', { detail: detail }));
+    }
+
+    /**
+     * Validates an individual input based on its name and value.
+     * @param {HTMLInputElement} input 
+     * @returns boolean for validity of input and an error message if any.
+     */
+    validateInput(input) {
+        let isValid = false;
+        let errorMessage = undefined;
+        let trimmedValue = input.value.trim();
+        switch (input.name) {
+            case 'PROCESSED_FILES_DIRECTORY':
+                isValid = this.isValidDirectoryPath(trimmedValue);
+                input.value = isValid !== true ? input.value : trimmedValue;
+                errorMessage = isValid !== true ? 'Path must be a valid windows directory path, relative or fully qualified.' : undefined;
+                break;
+            case 'CACHE_TYPE':
+                isValid = this.isValidCacheType(trimmedValue);
+                input.value = isValid !== true ? input.value : trimmedValue;
+                errorMessage = isValid !== true ? 'Cache type must be a valid cache type for flask-caching. See documentation for more details.' : undefined;
+                break;
+            case 'COMPLIANCE_PARTNER_RATES_name[]':
+            case 'CONSULTING_PARTNER_RATES_name[]':
+                isValid = this.isValidName(trimmedValue);
+                input.value = isValid !== true ? input.value : trimmedValue;
+                errorMessage = isValid !== true ? 'Name must be a string containing only alphanumeric and common non-alphanumeric characters.' : undefined;
+                break;
+            case 'COMPLIANCE_PARTNER_RATES_rate[]':
+            case 'COMPLIANCE_BOOKKEEPING_RATES':
+            case 'CONSULTING_PARTNER_RATES_rate[]':
+            case 'COMPLIANCE_ASSOCIATE_RATES':
+            case 'CONSULTING_ASSOCIATE_RATES':
+                isValid = this.rateValidator(trimmedValue);
+                input.value = isValid !== true ? input.value : this.rateFormatter(trimmedValue);
+                errorMessage = isValid !== true ? 'Rate must be a valid number or float.' : undefined;
+                break;
+        }
+        return {isValid, errorMessage}
+    }
+
+    /**
+     * Adds change event listeners to input fields for validation.
+     * Each input is validated based on its type when its value changes.
+     */
+    validateUserSettingsInput() {
+        // Validate each input
+        const inputs = document.querySelectorAll('input[type="text"]');
+        inputs.forEach(input => {
+            input.addEventListener('change', (event) => {
+                let {isValid, errorMessage} = this.validateInput(input)
+
+                this.markInputValidity(input, isValid, errorMessage)
+
+                if (!isValid) {
+                    console.error('Invalid input:', input.name);
+                    api.logToServer('error', `Invalid input: ${input.name}`);
+                }
+            });
+        });
+    }
+
+    /**
+     * Adds a submit event listener to the user settings form.
+     * Prevents default form submission and triggers custom validation and saving.
+     */
+    validateUserSettingsForm() {
+        const userSettingsForm = document.getElementById('userSettings');
+        userSettingsForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            let isFormValid = true;
+            userSettingsForm.querySelectorAll('input[type="text"]').forEach(input => {
+                let {isValid, errorMessage} = this.validateInput(input);
+                this.markInputValidity(input, isValid, errorMessage);
+                if (!isValid) {
+                    isFormValid = false;
+                }
+            });
+
+            if (!isFormValid) {
+                console.error('Form contains invalid inputs');
+                // Optionally, focus on the first invalid input
+                userSettingsForm.querySelector('.input-error')?.focus();
+                return;
+            }
+
+            const csrf = userSettingsForm.querySelector('#csrf-token').value;
+            const formElements = userSettingsForm.querySelectorAll('.formElement');
+            
+            this.saveUserSettings(formElements, csrf);
+        });
     }
 
     /**
