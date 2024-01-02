@@ -1,0 +1,25 @@
+<table>
+    <thead>
+        <tr>
+            <th>Filename</th>
+            <th>Address</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in data %}
+            <tr class="clickable-row">
+                <td>{{ item.filename }}</td>
+                <td>{{ item.address }}</td>
+            </tr>
+            <tr class="accordian-content d-none">
+                <td colspan="2">
+                    <ul>
+                        {% for entity in item.entities %}
+                            <li>{{ entity.name_of_entity }}: {{ entity.type_of_return }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Entity Checker{% endblock %}
+
+{% block headScript %}
+<script type="module">
+    import { app } from './scripts/app.js';
+    await app.setup('entityChecker');
+    window.app = app;
+
+    let {selectFolder, folderSelected} = app.setupFolderSelection();
+    window.selectFolder = selectFolder;
+    window.folderSelected = folderSelected;
+
+    const folderSelectionSupportAlertEl = document.getElementById('folderSelectionSupport-alert');
+    if (!app.isFolderSelectionSupported()) {
+        folderSelectionSupportAlertEl.hidden = false;
+    }
+
+    const entityCheckerForm = document.getElementById('entityChecker');
+    entityCheckerForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        console.log(formData);
+
+        app.entityChecker(formData);
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<h1 class="title text-center">ELS: Entity Checker</h1>
+<div id="folderSelectionSupport-alert" class="alert alert-error" hidden>Incompatible browser for folder select. Please switch to Chrome, Edge or Opera.</div>
+<form method="post" action="/entityChecker/check-entities" enctype="multipart/form-data" id="entityChecker">
+    <input type="hidden" name="csrf-token" id="csrf-token" value="{{ csrf_token() }}">
+    <div id="entityChecker-alertPlaceholder"></div>
+    <div id="entityChecker-progressBarContainer" class="progress-bar-container" hidden>
+        <div id="progressBar" class="progress-bar"></div>
+    </div>
+    <div class="form-group">
+        <input class="input" type="text" id="entityCheckDirectory" disabled>
+        <button class="btn btn-primary" type="button" onclick="selectFolder('entityCheckDirectory')">Select Folder</button>
+        <input type="file" name="entityCheckDirectory" id="entityCheckDirectory-picker" webkitdirectory directory multiple style="display: none;" onchange="folderSelected('entityCheckDirectory', 'entityCheckDirectory-picker')">
+    </div>
+    <div>
+        <button class="btn btn-secondary submit-button" type="submit">Process</button>
+    </div>
+</form>
+<!-- Entity Check Results -->
+<h3>Entity Check Table:</h3>
+<div id="entityCheckerUpdate" class="table-container"></div>
+<div id="alertModal-overlay" class="modal-overlay"></div>
+{% endblock %}
