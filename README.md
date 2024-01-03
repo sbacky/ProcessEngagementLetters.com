@@ -1,6 +1,6 @@
 # Engagement Letter System (ELS)
 
-This is a Flask application for an Engagement Letter System. This application rolls over engagement lotters to the next year, extract address and entities from engagement letters to check information, and print engagement letters from word to pdf.
+This is a Flask application for an Engagement Letter System. This application can rollover engagement letters, check entities on engagement letters and print engagement letters to PDF.
 
 This project is a direct successor to my previous engagemnt letter project found here: https://github.com/sbacky/Proc-Engagement-Letters/tree/main.
 
