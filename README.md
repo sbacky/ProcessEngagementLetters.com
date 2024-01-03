@@ -10,6 +10,10 @@ DO NOT STORE IMPORTANT FILES IN 'temp/' DIRECTORY!!
 
 ## Setup and Usage
 
+Follow the below instructions to setup the Engagement Letter System application and detailed descriptions of each process.
+
+### Setup
+
 Recommended Browser: Chrome or Edge
 
 Selecting files might not work as intended if you do not use Chrome or Edge. This is because the application uses webkitdirectory to take advantage of the browsers ability to easily navigate a users file directory and select files.
@@ -26,19 +30,23 @@ git clone https://github.com/sbacky/ProcessEngagementLetters.com.git
 
 3. Run 'els.bat'. The batch file will handle creating and activating the virtual environment, installing dependancies from requirements.txt, setting environment variables, pulling latest version from GitHub and launching the application.
 
-### Rollover
+### Usage
+
+A detailed description of each Engagement Letter System process is available below.
+
+#### Rollover
 
 Upload engagement letters and roll them forward one year. Rolled over engagement letters are saved to 'temp/complete' by default. Can optionally change the directory engagement letters are saved to, partner names and partner rates on settings page.
 
 Results are displayed in real time as each engagement letter is processed. Each result will display whether the process was a success or failed followed by the filename. Success results are printed in **#8F754F** and failed results are printed in **#C44536**.
 
-### Entity Check
+#### Entity Check
 
 Upload engagement letters to extract address and entity information from each letter.
 
 Results are displayed after entity information has bee extracted from each document. Results are displayed in a two column table with filename and address. Each row can be clicked on to open an accordion displaying a list of entity names and return types. 
 
-### PDF Printer
+#### PDF Printer
 
 Upload engagement letters and print them to PDF. PDFs are saved to 'temp/pdf' by default. Can optionally change the directory PDFs are saved to on settings page.
 
