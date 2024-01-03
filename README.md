@@ -1,6 +1,6 @@
 # Engagement Letter System (ELS)
 
-This is a Flask application for an Engagement Letter System. This application processes engagement letters by rolling them over to the next year. I added a front-end to a previous engagement letter project and updated how each engagement letter is processed.
+This is a Flask application for an Engagement Letter System. This application rolls over engagement lotters to the next year, extract address and entities from engagement letters to check information, and print engagement letters from word to pdf.
 
 This project is a direct successor to my previous engagemnt letter project found here: https://github.com/sbacky/Proc-Engagement-Letters/tree/main.
 
@@ -26,6 +26,24 @@ git clone https://github.com/sbacky/ProcessEngagementLetters.com.git
 
 3. Run 'els.bat'. The batch file will handle creating and activating the virtual environment, installing dependancies from requirements.txt, setting environment variables, pulling latest version from GitHub and launching the application.
 
+### Rollover
+
+Upload engagement letters and roll them forward one year. Rolled over engagement letters are saved to 'temp/complete' by default. Can optionally change the directory engagement letters are saved to, partner names and partner rates on settings page.
+
+Results are displayed in real time as each engagement letter is processed. Each result will display whether the process was a success or failed followed by the filename. Success results are printed in **#8F754F** and failed results are printed in **#C44536**.
+
+### Entity Check
+
+Upload engagement letters to extract address and entity information from each letter.
+
+Results are displayed after entity information has bee extracted from each document. Results are displayed in a two column table with filename and address. Each row can be clicked on to open an accordion displaying a list of entity names and return types. 
+
+### PDF Printer
+
+Upload engagement letters and print them to PDF. PDFs are saved to 'temp/pdf' by default. Can optionally change the directory PDFs are saved to on settings page.
+
+Results are displyed in real time as each letter is printed to PDF. Each result will display whether the letter was printed to PDF successfully or failed followed by the filename. Success results are printed in **#8F754F** and failed results are printed in **#C44536**.
+
 ## Settings
 
 Settings can be configured on the settings page in the application or by directly modifying the user-config.json file. Each setting has the following properties:
@@ -43,6 +61,13 @@ Set the directory where processed engagement letters will be saved. By default, 
 
 * type: string
 * default: temp/complete
+
+### PDF Engagement Letters Directory
+
+Set the directory where engagement letters printed to pdf will be saved. By default, all pdfs are saved to 'temp/pdf'.
+
+* type: string
+* default: temp/pdf
 
 ### Cache Type
 
