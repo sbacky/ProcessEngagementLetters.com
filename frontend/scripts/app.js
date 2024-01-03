@@ -758,7 +758,7 @@ class PELApp {
     }
 
     /**
-     * 
+     * Format request to check entities and handle response
      * @param {FormData} formData 
      */
     async entityChecker(formData) {
@@ -777,6 +777,24 @@ class PELApp {
                 nextContent.classList.toggle('d-table-row');
             });
         });
+    }
+
+    /**
+     * Format request to print uploaded files to pdf and handle response.
+     * @param {FormData} formData - uploaded files
+     */
+    async pdfPrinter(formData) {
+        const csrf = formData.get('csrf-token');
+        formData.delete('csrf-token');
+
+        const resp = await api.printToPdf(formData, csrf);
+        if (resp.status == 'success') {
+            console.log(resp.message);
+        } else if (resp.status == 'error') {
+            console.error(resp.message);
+        } else {
+            console.error(`Unknown error: ${JSON.stringify(resp)}`);
+        }
     }
 }
 

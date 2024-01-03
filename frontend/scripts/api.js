@@ -170,7 +170,7 @@ class PELApi {
     }
 
     /**
-     * 
+     * Send uploaded files to backend to process engagement letters
      * @param {FormData} formData - Form data for processEngagementLetters form
      * @param {string} csrf - the CSRF token
      */
@@ -241,7 +241,7 @@ class PELApi {
     }
 
     /**
-     * 
+     * Send uploaded files to backend to extract entity information
      * @param {FormData} formData - Form data for entityChecker form
      * @param {string} csrf - the CSRF token
      */
@@ -261,6 +261,31 @@ class PELApi {
         } catch (error) {
             this.logToServer('error', `An error occurred while checking entities: ${error}`);
             console.error(`An error occurred while checking entities: ${error}`);
+        }
+    }
+
+    /**
+     * Send uploaded files to backend to be printed to pdf
+     * @param {FormData} formData - Form data for pdfPrinter form
+     * @param {string} csrf - the csrf token
+     * @returns 
+     */
+    async printToPdf(formData, csrf) {
+        const endpoint = '/pdfPrinter/print-to-pdf';
+        const url = this.apiURL(endpoint);
+        try {
+            const resp = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-Token': csrf
+                },
+                body: formData
+            });
+            const respData = await resp.json();
+            return respData;
+        } catch (error) {
+            this.logToServer('error', `An error occurred while printing documents to pdf: ${error}`);
+            console.error(`An error occurred while printing documents to pdf: ${error}`);
         }
     }
 }
