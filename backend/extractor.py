@@ -42,6 +42,7 @@ def process_document(file_path: str):
     doc: Document = docx.Document(file_path)
     paragraphs = [p.text for p in doc.paragraphs]
 
+    # TODO: parallel process the extracting functions o improve performance
     address = extract_address(paragraphs)
     entities = extract_entities(paragraphs)
 
