@@ -31,6 +31,7 @@ from backend.utils.load_json import load_json_data
 from backend.utils.path_utils import get_full_path, directory_check, custom_secure_filename
 from backend.processor import process_engagement_letter
 from backend.extractor import process_document
+from backend.converter import convert_word_to_pdf
 
 
 class Server:
@@ -300,14 +301,6 @@ class Server:
                 
                 current_year_files = request.files.getlist('currentYearDirectory')
                 processed_files_directory = self.app.config.get('PROCESSED_FILES_DIRECTORY', get_full_path('temp/complete'))
-                if not directory_check(processed_files_directory):
-                    self.send_message('process-error', {
-                        "error": "Letter Processing Error",
-                        "message": f'The specified directory ( {processed_files_directory} ) does not exist. Configure in settings or in config file.',
-                        "process": process,
-                        "method": method
-                    })
-                    return jsonify(error=f'The specified directory ( {processed_files_directory} ) does not exist. Configure in settings or in config file.'), 400
                 
                 # Send processing event for POST method
                 self.send_message('processing', {
@@ -315,6 +308,15 @@ class Server:
                     "method": method,
                     "message": f'Processing...'
                 })
+
+                if not directory_check(processed_files_directory, True):
+                    self.send_message('process-error', {
+                        "error": "Letter Processing Error",
+                        "message": f'The specified directory ( {processed_files_directory} ) does not exist. Configure in settings or in config file.',
+                        "process": process,
+                        "method": method
+                    })
+                    return jsonify({"status": "error", "message": f'The specified directory ( {processed_files_directory} ) does not exist. Configure in settings or in config file.'}), 400
                 
                 temp_dir = get_full_path('temp/processing')
                 directory_check(temp_dir, True)
@@ -353,7 +355,7 @@ class Server:
                         self.send_message('process-results',{
                             "process": process,
                             "status": "success" if processed_result is not None else "failed",
-                            "filename": processed_result if processed_result is not None else filename
+                            "filename": processed_result if processed_result is not None else " ".join(filename.split("_"))
                         })                        
                         # Send progress event to frontend
                         self.send_message('progress', {
@@ -448,6 +450,104 @@ class Server:
                         "method": method
                     })
                     self.app.logger.exception(f'An unexpected error has occurred while extracting entities.', stack_info=True)
+                    return render_template('entity_table_error.html', error_massage=f'An unexpected error has occurred while extracting entities.')
+                finally:
+                    # Clear 'temp/processing' directory
+                    shutil.rmtree(temp_dir)
+
+        @self.app.route('/pdfPrinter', methods=['GET'])
+        def pdf_printer():
+            process = 'pdfPrinter'
+            self.send_message("process-start", "Fetching pdf printer page...")
+            if request.method == 'GET':
+                method = 'GET'
+                # Send processing event for GET method
+                self.send_message('processing', {
+                    "process": process,
+                    "method": method,
+                    "message": "Loading..."
+                })
+                # Send complete event
+                self.send_message('complete', "Page loaded successfully!")
+                return render_template('pdf_printer.html')
+
+        @self.app.route('/pdfPrinter/print-to-pdf', methods=['POST'])
+        def print_to_pdf():
+            process = 'pdfPrinter'
+            self.send_message("process-start", "Printing documents to PDF")
+            if request.method == 'POST':
+                method = 'POST'
+                # Get uploaded files from form
+                pdf_print_files = request.files.getlist('pdfPrintDirectory')
+                # get directory for printed pdf files
+                pdf_files_directory = self.app.config.get('PDF_FILES_DIRECTORY', get_full_path('temp/pdf'))
+                # Send processing event for POST method
+                self.send_message('processing', {
+                    "process": process,
+                    "method": method,
+                    "message": f'Processing...'
+                })
+                
+                if not directory_check(pdf_files_directory, True):
+                    self.send_message('process-error', {
+                        "error": "PDF Printer Error",
+                        "message": f'The specified directory ( {pdf_files_directory} ) does not exist. Configure in settings or in config file.',
+                        "process": process,
+                        "method": method
+                    })
+                    return jsonify({"status": "error", "message": f'The specified directory ( {pdf_files_directory} ) does not exist. Configure in settings or in config file.'}), 400
+
+                temp_dir = get_full_path('temp/processing')
+                directory_check(temp_dir, True)
+
+                try:
+                    total_files = len(pdf_print_files)
+                    for index, file in enumerate(pdf_print_files, 1):
+                        filename: str = custom_secure_filename(os.path.basename(file.filename))
+
+                        # Move to next file if it is not a word document file ending in '.docx'.
+                        if filename.startswith('~') or not filename.endswith('.docx'):
+                            continue
+
+                        # Save temp file to 'temp/processing'
+                        temp_file_path = os.path.join(temp_dir, filename)
+                        file.save(temp_file_path)
+                        # Implement word to pdf file conversion
+                        output_path, error = convert_word_to_pdf(temp_file_path, pdf_files_directory)
+                        # Log errors
+                        if (error is not None):
+                            # Send process-error event
+                            self.send_message('process-error', {
+                                "error": "PDF Printer Error",
+                                "message": error,
+                                "process": process,
+                                "method": method
+                            })
+                            self.app.logger.error(error)
+                        # Send results event to frontend
+                        self.send_message('process-results',{
+                            "process": process,
+                            "status": "success" if output_path is not None else "failed",
+                            "filename": output_path if output_path is not None else " ".join(filename.split("_"))
+                        })  
+                        # Send progress event to frontend
+                        self.send_message('progress', {
+                            'process': process,
+                            'value': index/total_files
+                        })
+                    
+                    self.send_message('complete', 'Successfully printed documents to PDF!')
+                    return jsonify({'status': 'success', 'message': 'Successfully printed documents to PDF!'})
+                except Exception as e:
+                    # Send process-error event
+                    self.send_message('process-error', {
+                        "error": "PDF Printer Error",
+                        "message": 'An unexpected error has occurred while printing documents to PDF',
+                        "process": process,
+                        "method": method
+                    })
+                    self.app.logger.exception('An unexpected error has occurred while printing documents to PDF', stack_info=True)
+                    return jsonify({'status': 'error', 'message': 'An unexpected error has occurred while printing documents to PDF'}), 500
                 finally:
                     # Clear 'temp/processing' directory
                     shutil.rmtree(temp_dir)
@@ -515,6 +615,13 @@ class Server:
         settings: list[dict[str, str|int]] = load_json_data(user_config_path)
         self.apply_user_settings(settings)
 
+        # Ensure temp directory exists otherwise create it
+        temp_dir = get_full_path("temp")
+        if not directory_check(temp_dir, True):
+            print(f'Unable to create temp directory at: {temp_dir}')
+            self.app.logger.error(f'Unable to create temp directory at: {temp_dir}', stack_info=True)
+
+        # Ensure only one tab opens on startup
         if debug and not os.environ.get('WERKZEUG_RUN_MAIN'):
             self.app.logger.info("Setting up threading timer to open browser.")
             threading.Timer(1.25, lambda: self.open_browser(host, port)).start()
@@ -522,6 +629,7 @@ class Server:
             self.app.logger.info("Setting up threading timer to open browser.")
             threading.Timer(1.25, lambda: self.open_browser(host, port)).start()
             self.__class__.STARTED = True
+            
         self.app.run(host=host, port=port, debug=debug)
 
     def shutdown_server(self):
