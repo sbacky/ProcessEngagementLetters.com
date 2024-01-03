@@ -6,4 +6,4 @@ process_engagement_letters.old.py
 .env
 _cache
 *.log*
-temp/complete
+temp/*
