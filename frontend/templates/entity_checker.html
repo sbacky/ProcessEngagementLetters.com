@@ -20,17 +20,15 @@
     const entityCheckerForm = document.getElementById('entityChecker');
     entityCheckerForm.addEventListener('submit', function(event) {
         event.preventDefault();
-
         const formData = new FormData(this);
-        console.log(formData);
-
         app.entityChecker(formData);
     });
 </script>
 {% endblock %}
 
 {% block content %}
-<h1 class="title text-center">ELS: Entity Checker</h1>
+<h1 class="title is-1 text-center">ELS: Entity Checker</h1>
+<p class="subtitle is-3 text-center">Check address and entities for engagement letters</p>
 <div id="folderSelectionSupport-alert" class="alert alert-error" hidden>Incompatible browser for folder select. Please switch to Chrome, Edge or Opera.</div>
 <form method="post" action="/entityChecker/check-entities" enctype="multipart/form-data" id="entityChecker">
     <input type="hidden" name="csrf-token" id="csrf-token" value="{{ csrf_token() }}">
@@ -44,11 +42,12 @@
         <input type="file" name="entityCheckDirectory" id="entityCheckDirectory-picker" webkitdirectory directory multiple style="display: none;" onchange="folderSelected('entityCheckDirectory', 'entityCheckDirectory-picker')">
     </div>
     <div>
-        <button class="btn btn-secondary submit-button" type="submit">Process</button>
+        <button class="btn btn-secondary submit-button" type="submit">Check Entity</button>
     </div>
 </form>
 <!-- Entity Check Results -->
-<h3>Entity Check Table:</h3>
+<h3 class="title is-3">Entity Check Table:</h3>
+<p class="subtitle is-5">Address and entities are displayed below</p>
 <div id="entityCheckerUpdate" class="table-container"></div>
 <div id="alertModal-overlay" class="modal-overlay"></div>
 {% endblock %}
