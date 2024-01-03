@@ -8,6 +8,14 @@
         "value": "temp/complete"
     },
     {
+        "id": "PEL.PdfDirectory",
+        "name": "PDF Engagement Letters Directory",
+        "config_name": "PDF_FILES_DIRECTORY",
+        "description": "Set the directory where engagement letters printed to pdf will be saved. By default, all pdfs are saved to 'temp/pdf'.",
+        "type": "string",
+        "value": "temp/pdf"
+    },
+    {
         "id": "PEL.Other.CacheType",
         "name": "Cache Type",
         "config_name": "CACHE_TYPE",
