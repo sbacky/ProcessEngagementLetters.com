@@ -345,11 +345,11 @@ main {
     display: flex;
 }
 
-/* Title Classes */
+/* Title and Subtitle Classes */
 .title {
     font-family: var(--heading-font-family);
     font-weight: bold;
-    margin-bottom: calc(var(--spacing-unit) * 2);
+    margin-bottom: var(--spacing-unit);
 }
 
 .title.is-1 { font-size: 2.5rem; }
@@ -359,9 +359,19 @@ main {
 .title.is-5 { font-size: 1.25rem; }
 .title.is-6 { font-size: 1rem; }
 
-/* Center Text */
-.text-center {
-    text-align: center;
+.subtitle {
+    margin-top: 0;
+}
+
+.subtitle.is-1 { font-size: 2.5rem; }
+.subtitle.is-2 { font-size: 2rem; }
+.subtitle.is-3 { font-size: 1.75rem; }
+.subtitle.is-4 { font-size: 1.5rem; }
+.subtitle.is-5 { font-size: 1.25rem; }
+.subtitle.is-6 { font-size: 1rem; }
+
+.title + .subtitle {
+    margin-top: calc(var(--spacing-unit) * -0.5);
 }
 
 /* Modal Styles */
@@ -882,6 +892,25 @@ form {
     margin-bottom: 5px; /* Space between items */
 }
 
+/* Overlays */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-content {
+    text-align: center;
+    color: white;
+}
+
 /* Utility functions */
 .d-none {
     display: none;
@@ -897,6 +926,10 @@ form {
 
 .d-flex {
     display: flex;
+}
+
+.text-center {
+    text-align: center;
 }
 
 /* Media Queries */
