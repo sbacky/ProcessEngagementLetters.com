@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block headScript %}
+<script type="module">
+    import { app } from './scripts/app.js';
+    await app.setup('pdfPrinter');
+    window.app = app;
+
+    let {selectFolder, folderSelected} = app.setupFolderSelection();
+    window.selectFolder = selectFolder;
+    window.folderSelected = folderSelected;
+
+    const folderSelectionSupportAlertEl = document.getElementById('folderSelectionSupport-alert');
+    if (!app.isFolderSelectionSupported()) {
+        folderSelectionSupportAlertEl.hidden = false;
+    }
+
+    const pdfPrinterForms = document.getElementById('pdfPrinter');
+    pdfPrinterForms.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        app.pdfPrinter(formData);
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<h1 class="title is-1 text-center">ELS: PDF Printer</h1>
+<p class="subtitle is-3 text-center">Print engagement letters to PDF</p>
+<div id="folderSelectionSupport-alert" class="alert alert-error" hidden>Incompatible browser for folder select. Please switch to Chrome, Edge or Opera.</div>
+<form method="post" action="/pdfPrinter/print-to-pdf" enctype="multipart/form-data" id="pdfPrinter">
+    <input type="hidden" name="csrf-token" id="csrf-token" value="{{ csrf_token() }}">
+    <div id="pdfPrinter-alertPlaceholder"></div>
+    <div id="pdfPrinter-progressBarContainer" class="progress-bar-container" hidden>
+        <div id="progressBar" class="progress-bar"></div>
+    </div>
+    <div class="form-group">
+        <input class="input" type="text" id="pdfPrintDirectory" disabled>
+        <button class="btn btn-primary" type="button" onclick="selectFolder('pdfPrintDirectory')">Select Folder</button>
+        <input type="file" name="pdfPrintDirectory" id="pdfPrintDirectory-picker" webkitdirectory directory multiple style="display: none;" onchange="folderSelected('pdfPrintDirectory', 'pdfPrintDirectory-picker')">
+    </div>
+    <div>
+        <button class="btn btn-secondary submit-button" type="submit">Print to PDF</button>
+    </div>
+</form>
+<!-- Show results in a scrollable box -->
+<h3 class="title is-3">PDF Results:</h3>
+<p class="subtitle is-5">Conversion results are displayed below</p>
+<div id="pdfPrinter-results" class="results-container"></div>
+<div id="alertModal-overlay" class="modal-overlay"></div>
+{% endblock %}
