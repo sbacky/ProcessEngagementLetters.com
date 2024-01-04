@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 from queue import Queue
 import shutil
+import time
 import threading
 from typing import Any
 import webbrowser
@@ -32,6 +33,7 @@ from backend.utils.path_utils import get_full_path, directory_check, custom_secu
 from backend.processor import process_engagement_letter
 from backend.extractor import process_document
 from backend.converter import convert_word_to_pdf
+from backend.pdf_signature import find_signature_position, extract_name, add_signature
 
 
 class Server:
@@ -176,9 +178,31 @@ class Server:
         
         @self.app.route('/shutdown', methods=['POST'])
         def shutdown():
-            # Add authentication or other security checks here
-            self.shutdown_server()
-            return 'Server shutting down...', 200
+            process = 'serverShutdown'
+            self.send_message("process-start", "Shutting down server...")
+            method = 'POST'
+            try:
+                # Send processing event
+                self.send_message('processing', {
+                    "process": process,
+                    "method": method,
+                    "message": "Loading..."
+                })
+                # Add authentication or other security checks here
+                self.shutdown_server()
+                # Send complete event
+                self.send_message('complete', "Server shutdown successfully!")
+                return 'Server shutting down...', 200
+            except Exception as e:
+                # Send process-error event
+                self.send_message('process-error', {
+                    "error": "Letter Processing Error",
+                    "message": f'An unexpected error has occurred while shutting down the server: {e}',
+                    "process": process,
+                    "method": method
+                })
+                self.app.logger.exception(f'An unexpected error has occurred while shutting down the server: {e}', stack_info=True)
+                return f'An unexpected error has occurred while shutting down the server. Check logs for more information.'
         
         @self.app.errorhandler(Exception)
         def handle_exception(e):
@@ -548,6 +572,126 @@ class Server:
                     })
                     self.app.logger.exception('An unexpected error has occurred while printing documents to PDF', stack_info=True)
                     return jsonify({'status': 'error', 'message': 'An unexpected error has occurred while printing documents to PDF'}), 500
+                finally:
+                    # Clear 'temp/processing' directory
+                    shutil.rmtree(temp_dir)
+
+        @self.app.route('/pdfSignatures', methods=['GET'])
+        def pdf_signatures():
+            process = 'pdfSignatures'
+            self.send_message("process-start", "Fetching pdf signatures page")
+            if request.method == 'GET':
+                method = 'GET'
+                # Send processing event for GET method
+                self.send_message('processing', {
+                    "process": process,
+                    "method": method,
+                    "message": "Loading..."
+                })
+                # Send complete event
+                self.send_message('complete', "Page loaded successfully!")
+                return render_template('pdf_signatures.html')
+
+        @self.app.route('/pdfSignatures/add-signatures', methods=['POST'])
+        def add_signatures():
+            process = 'pdfSignatures'
+            self.send_message("process-start", "Adding signatures to PDF documents")
+            if request.method == 'POST':
+                method = 'POST'
+                # Get uploaded files from form
+                pdf_signatures_files = request.files.getlist('pdfSignaturesDirectory')
+                # get directory for pdf files with signatures
+                pdf_files_directory = self.app.config.get('PDF_SIGNATURES_DIRECTORY', get_full_path('temp/signatures'))
+                # Send processing event for POST method
+                self.send_message('processing', {
+                    "process": process,
+                    "method": method,
+                    "message": f'Processing...'
+                })
+                # Verify pdf signature directory is real, create it otherwise.
+                if not directory_check(pdf_files_directory, True):
+                    self.send_message('process-error', {
+                        "error": "PDF Signatures Error",
+                        "message": f'The specified directory ( {pdf_files_directory} ) does not exist. Configure in settings or in config file.',
+                        "process": process,
+                        "method": method
+                    })
+                    return jsonify({"status": "error", "message": f'The specified directory ( {pdf_files_directory} ) does not exist. Configure in settings or in config file.'}), 400
+
+                temp_dir = get_full_path('temp/processing')
+                directory_check(temp_dir, True)
+
+                try:
+                    total_files = len(pdf_signatures_files)
+                    for index, file in enumerate(pdf_signatures_files, 1):
+                        filename: str = custom_secure_filename(os.path.basename(file.filename))
+
+                        # Move to next file if it is not a pdf document file ending in '.pdf'.
+                        if not filename.endswith('.pdf'):
+                            continue
+
+                        # Save temp file to 'temp/processing'
+                        temp_file_path = os.path.join(temp_dir, filename)
+                        file.save(temp_file_path)
+
+                        # Get paths to output pdf files
+                        output_filename = ' '.join(filename.split('_'))
+                        output_pdf_path = os.path.join(pdf_files_directory, output_filename)
+
+                        # add pdf signatures
+                        signature_name = extract_name(temp_file_path)
+                        page_number, y_position = find_signature_position(temp_file_path)
+
+                        self.app.logger.info(f'Signature name: {signature_name}, Page number: {page_number}, Y position: {y_position}')
+
+                        if signature_name is None or page_number is None:
+                            output_path = None
+                            error = "An error occurred getting signature name or finding signature position in the document. See logs for more information."
+                            self.app.logger.error(f'signature_name: {signature_name}, page_number: {page_number}', stack_info=True)
+                        else:
+                            # Get path for signature file
+                            signature_file = f"{'_'.join(signature_name.split(' '))}.pdf"
+                            signature_path = os.path.join(get_full_path('images/signatures'), signature_file)
+
+                            self.app.logger.info(f'Signature path: {signature_path}')
+
+                            output_path, error = add_signature(temp_file_path, output_pdf_path, signature_path, (page_number, y_position))
+
+                        # Log errors
+                        if (error is not None):
+                            # Send process-error event
+                            self.send_message('process-error', {
+                                "error": "PDF Signatures Error",
+                                "message": error,
+                                "process": process,
+                                "method": method
+                            })
+                            self.app.logger.error(error)
+                        # Send results event to frontend
+                        self.send_message('process-results',{
+                            "process": process,
+                            "status": "success" if output_path is not None else "failed",
+                            "filename": output_path if output_path is not None else " ".join(filename.split("_"))
+                        })  
+                        # Send progress event to frontend
+                        self.send_message('progress', {
+                            'process': process,
+                            'value': index/total_files
+                        })
+                    
+                    self.send_message('complete', 'Successfully printed documents to PDF!')
+                    return jsonify({'status': 'success', 'message': 'Successfully printed documents to PDF!'})
+
+                except Exception as e:
+                    # Send process-error event
+                    self.send_message('process-error', {
+                        "error": "PDF Signatures Error",
+                        "message": 'An unexpected error has occurred while adding signatures to PDF documents',
+                        "process": process,
+                        "method": method
+                    })
+                    self.app.logger.exception('An unexpected error has occurred while adding signatures to PDF documents', stack_info=True)
+                    return jsonify({'status': 'error', 'message': 'An unexpected error has occurred while adding signatures to PDF documents'}), 500
                 finally:
                     # Clear 'temp/processing' directory
                     shutil.rmtree(temp_dir)
