@@ -16,6 +16,14 @@
         "value": "temp/pdf"
     },
     {
+        "id": "PEL.SignatureDirectory",
+        "name": "PDF Signatures Directory",
+        "config_name": "PDF_SIGNATURES_DIRECTORY",
+        "description": "Set the directory where engagement letter PDFs with signatures added will be saved. By default, all pdfs are saved to 'temp/signatures'.",
+        "type": "string",
+        "value": "temp/signatures"
+    },
+    {
         "id": "PEL.Other.CacheType",
         "name": "Cache Type",
         "config_name": "CACHE_TYPE",
