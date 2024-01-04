@@ -559,6 +559,7 @@ class Server:
                             'process': process,
                             'value': index/total_files
                         })
+                        time.sleep(0.5)
                     
                     self.send_message('complete', 'Successfully printed documents to PDF!')
                     return jsonify({'status': 'success', 'message': 'Successfully printed documents to PDF!'})
