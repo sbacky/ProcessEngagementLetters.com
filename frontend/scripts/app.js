@@ -796,6 +796,24 @@ class PELApp {
             console.error(`Unknown error: ${JSON.stringify(resp)}`);
         }
     }
+
+    /**
+     * Format request to add signatures to uploaded pdf files and handle response object.
+     * @param {FormData} formData - uploaded pdf files
+     */
+    async pdfSignatures(formData) {
+        const csrf = formData.get('csrf-token');
+        formData.delete('csrf-token');
+
+        const resp = await api.addSignature(formData, csrf);
+        if (resp.status == 'success') {
+            console.log(resp.message);
+        } else if (resp.status == 'error') {
+            console.error(resp.message);
+        } else {
+            console.error(`Unknown error: ${JSON.stringify(resp)}`);
+        }
+    }
 }
 
 const app = new PELApp();

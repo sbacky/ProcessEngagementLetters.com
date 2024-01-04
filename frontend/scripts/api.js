@@ -288,6 +288,31 @@ class PELApi {
             console.error(`An error occurred while printing documents to pdf: ${error}`);
         }
     }
+
+    /**
+     * Send uploaded df files to have signatures added to them
+     * @param {FormData} formData - the form data for pdfSignatures form data
+     * @param {string} csrf - the csrf token
+     * @returns response object
+     */
+    async addSignature(formData, csrf) {
+        const endpoint = '/pdfSignatures/add-signatures';
+        const url = this.apiURL(endpoint);
+        try {
+            const resp = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-Token': csrf
+                },
+                body: formData
+            });
+            const respData = await resp.json();
+            return respData;
+        } catch (error) {
+            this.logToServer('error', `An error occurred while printing documents to pdf: ${error}`);
+            console.error(`An error occurred while printing documents to pdf: ${error}`);
+        }
+    }
 }
 
 const api = new PELApi();
